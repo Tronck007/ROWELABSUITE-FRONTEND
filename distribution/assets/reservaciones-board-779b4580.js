@@ -1,0 +1,1 @@
+import{_ as e}from"./_plugin-vue_export-helper-c27b6911.js";import{V as o}from"./VRow-4111d537.js";import{o as r,f as s,e as a,d as t}from"./index-7294bbd4.js";const c={},_=t("h1",null,"Board de Indicadores",-1);function n(d,i){return r(),s(o,{class:"match-height"},{default:a(()=>[_]),_:1})}const h=e(c,[["render",n]]);export{h as default};

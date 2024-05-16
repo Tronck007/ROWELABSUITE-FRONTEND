@@ -1,0 +1,1 @@
+import{_ as e}from"./_plugin-vue_export-helper-c27b6911.js";import{o as s,c as o,d as t}from"./index-7294bbd4.js";const c={},n=t("h1",null,"InsLabSamples2",-1),a=[n];function r(_,l){return s(),o("div",null,a)}const m=e(c,[["render",r]]);export{m as default};

@@ -1,0 +1,1 @@
+import{_ as o}from"./_plugin-vue_export-helper-c27b6911.js";import{V as t}from"./VRow-4111d537.js";import{o as a,f as e,e as r,d as c}from"./index-7294bbd4.js";const s={},n=c("h1",null,"Control Lab Traceability",-1);function _(f,i){return a(),e(t,{class:"match-height"},{default:r(()=>[n]),_:1})}const h=o(s,[["render",_]]);export{h as default};

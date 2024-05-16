@@ -1,0 +1,6 @@
+
+<template>
+  <VRow class="match-height">
+    <h1>Control lab traceability</h1>
+  </VRow>
+</template>
