@@ -1,11 +1,13 @@
-<!-- eslint-disable vue/require-explicit-emits -->
+<!-- eslint-disable semi -->
+<!-- ActionButton.vue -->
 <script setup>
-import { useRouter } from 'vue-router';
+import { defineProps, defineEmits } from 'vue';
 
-const { showEdit, showDelete, showCheck, items, selectedItems, showGoToButton, showFinishButton, goToMenuConfig, gotoPage, disableDelete  } = defineProps({
+const props = defineProps({
   showEdit: Boolean,
   showDelete: Boolean,
   showCheck: Boolean,
+  showView: Boolean,
   showGoToButton: Boolean,
   showFinishButton: {
     type: Boolean,
@@ -15,95 +17,61 @@ const { showEdit, showDelete, showCheck, items, selectedItems, showGoToButton, s
     type: Boolean,
     default: false,
   },
-  goToPage: {
-    type: String,
-   
+  goToPage: String,
+  item: {
+    type: Object,
+    
   },
-  selectedItems: {
-    type: Array,
-    default: () => [],
-  },
-})
+});
 
-// Aquí defines los eventos que el componente puede emitir.
-const emit = defineEmits(["edit", "delete", "check", "goTo", "finishProcess"])
+const emit = defineEmits(['edit', 'delete', 'check', 'goto', 'finishProcess', 'view']);
 
-
-
-const router = useRouter()
-
-// Función para manejar el cambio de selección del checkbox
-const onCheckChange = isChecked => {
-  if (isChecked) {
-    emit('update:selectedItems', [...selectedItems.value, item.value])
-  } else {
-    const filteredItems = selectedItems.value.filter(selectedItem => selectedItem.id !== item.value.id)
-
-    emit('update:selectedItems', filteredItems)
-  }
-}
-
-// Vigilar por cambios en selectedItems para actualizar el estado del checkbox
-if (showCheck) {
-  watch(selectedItems, () => {
-    isSelected.value = selectedItems?.value.includes(item.value)
-  })
-}
-const isSelected = ref(false)
-
-// Método para manejar la navegación
-const navigateToItem = item => {
-
-  emit('goTo', item) // Opcional, si necesitas emitir este evento
-}
+const handleEdit = () => emit('edit', props.item);
+const handleDelete = () => emit('delete', props.item);
+const handleCheck = () => emit('check', props.item);
+const handleGoTo = () => emit('goto', props.item);
+const handleFinishProcess = () => emit('finishProcess', props.item);
+const handleView = () => emit('view', props.item);
 </script>
 
 <template>
   <div>
     <template v-if="showFinishButton">
-      <IconBtn @click.stop="$emit('finishProcess',item)">
-        <VIcon
-          icon="tabler-check"
-          style="color: #4CAF50"
-        />
+      <IconBtn @click.stop="handleFinishProcess">
+        <VIcon icon="tabler-check" style="color: #4CAF50" />
       </IconBtn>
     </template>
     <template v-if="showEdit">
-      <IconBtn @click.stop="$emit('edit', item)">
-        <VIcon
-          icon="tabler-edit"
-          style="color: #00abfb"
-        />
+      <IconBtn @click.stop="handleEdit">
+        <VIcon icon="tabler-edit" style="color: #00abfb" />
       </IconBtn>
     </template>
     <template v-if="showCheck">
       <VCheckbox
-        :input-value="isSelected"
-        color="success"
-        :value="item"
-        @change="onCheckChange"
+        :value="props.item"
+        @change="handleCheck"
       />
     </template>
-
     <template v-if="showDelete">
-      <IconBtn
-        :disabled="disableDelete"
-        @click.stop="$emit('delete', item)"
-      >
-        <VIcon
-          icon="tabler-trash"
-          
-          style="color: #ff4d4f"
-        />
+      <IconBtn :disabled="disableDelete" @click.stop="handleDelete">
+        <VIcon icon="tabler-trash" style="color: #ff4d4f" />
       </IconBtn>
     </template>
     <template v-if="showGoToButton">
-      <IconBtn @click.stop="navigateToItem(item)">
-        <VIcon
-          icon="tabler-arrow-right"
-          style="color: #00abfb"
-        />
+      <IconBtn @click.stop="handleGoTo">
+        <VIcon icon="tabler-arrow-right" style="color: #00abfb" />
+      </IconBtn>
+    </template>
+    <template v-if="showView">
+      <IconBtn @click.stop="handleView">
+        <VIcon icon="tabler-eye" style="color: #4CAF50" />
       </IconBtn>
     </template>
   </div>
 </template>
+
+<style scoped>
+.v-btn {
+  margin: 0 4px;
+}
+</style>

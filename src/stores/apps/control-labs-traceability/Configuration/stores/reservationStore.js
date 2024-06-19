@@ -79,35 +79,14 @@ export const useReservationStore = defineStore("reservation", {
       }
     },
 
-    async deleteReservation(item) {
-      console.log("reservationData", item);
-
-      const processCode = item.process_code;
+    async updateReservationState(id, newState) {
+      this.isLoading = true;
       try {
-        const updatedData = {
-          equipmentId: item.id_equipment,
-          status: "inactive",
-          details: "Inactive by user",
-          userId: userData.user_id,
-          userCode: userData.user_code,
-          email: userData.email,
-        };
-
-        const response = await equipmentService.endEquipment(
-          processCode,
-          updatedData,
-        );
-        const { body } = response;
-        const { meta } = body;
-
-        if (meta.status === 200) {
-          notify("deletion", "ok");
-          await this.getTestProcessById(processCode);
-        } else {
-          notify("deletion", "fail");
-        }
+        await reservationService.updateReservationState(id, newState);
       } catch (error) {
-        console.error("Error ending process:", error);
+        console.error("Error updating reservation state:", error);
+      } finally {
+        this.isLoading = false;
       }
     },
   },

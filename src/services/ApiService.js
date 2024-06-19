@@ -1,152 +1,149 @@
+/* eslint-disable semi */
 /* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable camelcase */
 /* eslint-disable sonarjs/no-useless-catch */
-import { $api } from '@/utils/api'
+import { $api } from "@/utils/api";
 
 /* eslint-disable sonarjs/no-useless-catch */
 class ApiService {
   constructor(resourcePath) {
-    this.resourcePath = resourcePath
+    this.resourcePath = resourcePath;
   }
 
-  async fetchAll(subPath = '') {
+  async fetchAll(subPath = "") {
     try {
-      const { data } = await $api.get(`${this.resourcePath}/${subPath}`)
+      const { data } = await $api.get(`${this.resourcePath}/${subPath}`);
 
-      console.log('data', data)
-    
+      const { body } = data;
 
-      const { body } = data
-
-
-      
-      
-      return body
+      return body;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
-  async fetchById(id, subPath = '') {
+  async fetchById(id, subPath = "") {
     try {
-      const fullPath = subPath ? `${subPath}/${id}` : `${this.resourcePath}/${id}`
+      const fullPath = subPath
+        ? `${subPath}/${id}`
+        : `${this.resourcePath}/${id}`;
 
-     
+      const { data } = await $api.get(fullPath);
 
-      const { data } = await $api.get(fullPath)
+      const { body } = data;
 
-
-
-      const { body } = data
-
-      
-      
-      return body
+      return body;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
-  async create(subPath = '', dataInput) { // Nota el cambio en el orden de los parámetros
+  async create(subPath = "", dataInput) {
+    // Nota el cambio en el orden de los parámetros
     try {
-      const fullPath = `${this.resourcePath}/${subPath}`
+      const fullPath = `${this.resourcePath}/${subPath}`;
+      const { data } = await $api.post(fullPath, dataInput);
 
-      console.log('fullPath', fullPath)
-      console.log('dataInput', dataInput)
-
-
-
-      const { data } = await $api.post(fullPath, dataInput)
-      
-      return data
+      return data;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
-  async update(id, data, subPath = '') {
+  async update(id, data, subPath = "") {
     try {
-      const fullPath = subPath ? `${subPath}/${id}` : `${this.resourcePath}/${id}`
+      const fullPath = subPath
+        ? `${subPath}/${id}`
+        : `${this.resourcePath}/${id}`;
 
       const response = await $api.put(fullPath, {
         body: JSON.stringify(data),
-      })
+      });
 
-      
-      return response.json()
+      return response.json();
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
-  async updatePatch(id, dataInfo, subPath = '') {
-
- 
+  async updatePatch(id, dataInfo, subPath = "") {
     try {
-      const fullPath = subPath ? `${subPath}/${id}` : `${this.resourcePath}/${id}`
+      const fullPath = subPath
+        ? `${subPath}/${id}`
+        : `${this.resourcePath}/${id}`;
 
-
-
-      const { user_code, sampleData } = dataInfo
+      const { userCode, userId, email, sampleData } = dataInfo;
 
       const { data } = await $api.patch(fullPath, {
-        user_code,
+        userCode,
+        userId,
+        email,
         sampleData,
-      })
+      });
 
-
-      console.log('data', data)
-      
-      return data
+      return data;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
-  async delete(id, updatedata, subPath = '') {
+  async delete(id, updatedata, subPath = "") {
     try {
-      const fullPath = subPath ? `${subPath}/${id}` : `${this.resourcePath}/${id}`
+      const fullPath = subPath
+        ? `${subPath}/${id}`
+        : `${this.resourcePath}/${id}`;
 
-      const{ user_code, state } = updatedata
+      const { userCode, useId, email, state } = updatedata;
 
-      const  data  = await $api.patch(fullPath, {
-        user_code, state, 
-      })
+      const data = await $api.patch(fullPath, {
+        userCode,
+        useId,
+        email,
+        state,
+      });
 
-      return { body: {
-        meta: { message: data.messages, status: 200 }, 
-      },
-      
-      }
-
+      return {
+        body: {
+          meta: { message: data.messages, status: 200 },
+        },
+      };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
-  async deleteEquipment(id, updatedata, subPath = '') {
+  async deleteEquipment(id, updatedata, subPath = "") {
     try {
-      const fullPath = subPath ? `${subPath}/${id}` : `${this.resourcePath}/${id}`
+      const fullPath = subPath
+        ? `${subPath}/${id}`
+        : `${this.resourcePath}/${id}`;
 
+      const { equipmentId, status, process_details, userCode, userId, email } =
+        updatedata;
 
+      // const data = await $api.patch(fullPath, {
+      //   equipmentId,
+      //   status,
 
-      const{ equipmentId, isActive, deleteInfo, userCode } = updatedata
+      //   process_details,
+      //   userCode,
+      //   userId,
+      //   email,
+      // });
+      const data = await $api.patch(fullPath, {
+        updatedata,
+      });
 
-      const  data  = await $api.patch(fullPath, {
-        equipmentId, isActive, deleteInfo, userCode,
-      })
-
-      return { body: {
-        meta: { message: data.messages, status: 200 }, 
-      },
-      
-      }
-
+      return {
+        body: {
+          meta: { message: data.messages, status: 200 },
+        },
+      };
     } catch (error) {
-      throw error
+      console.error("Error in deleteEquipment", error);
+      throw error;
     }
   }
 }
 
-
-export default ApiService
+export default ApiService;

@@ -55,7 +55,7 @@ const handleSend = async () => {
   }
 
   try {
-    await testAndEquipmentStore.createTestprocess(processId, dataToSend)
+    await testAndEquipmentStore.createTestProcess(processId, dataToSend)
     samplesSelected.value = []
     equipment.value = null
     test.value = null

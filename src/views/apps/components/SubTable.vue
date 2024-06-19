@@ -22,7 +22,7 @@ console.log('SubTable items:', items)
 const resolveStatusVariant = is_active => {
   if (is_active) {
     
-    return { color: "success", text: "Activa" }
+    return { color: "success", text: "Activo" }
   } else if (is_active === 7) {
     return { color: "warning", text: "Inactiva" }
   }

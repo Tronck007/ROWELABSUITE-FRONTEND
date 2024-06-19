@@ -89,6 +89,7 @@ const createProcess = async () => {
     sampleProcessesData: items.value.map(sample => ({
       sampling_id: sample.sampling_id,
       item_id: sample.item_id,
+      item_desc: sample.item_desc,
       item_batch_id: sample.item_batch_id,      
     })),
   }
@@ -120,6 +121,7 @@ const aggregateSamples = async () => {
     aggregate: items.value.map(sample => ({
       sampling_id: sample.sampling_id,
       item_id: sample.item_id,
+      item_desc: sample.item_desc,
       item_batch_id: sample.item_batch_id,      
     })),
   }
@@ -138,8 +140,11 @@ const handleSummit = () => {
   if (dialogStore.openBySection === 'samples') {
     // Crear un nuevo proceso de muestra si se abre desde la sección de muestras
     createProcess()
-  } else {
+  } else if (dialogStore.openBySection === 'reservation'){
     // Agregar muestras al proceso si se abre desde otra sección
+    "Desde la reservacion de muestras"
+   
+  } else {
     aggregateSamples()
   }
 
