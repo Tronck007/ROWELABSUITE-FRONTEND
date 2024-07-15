@@ -41,13 +41,16 @@ const credentials = ref({
 
 const rememberMe = ref(false)
 
+// Validador personalizado para campos requeridos
+const requiredValidator = (value) => !!value || 'Este campo es requerido'
+
 const login = async () => {
   try {
     await authStore.login(credentials.value)
     await router.replace(route.query.to ? String(route.query.to) : '/')
   } catch (err) {
     console.error('Login error:', err)
-    errors.value.loginFailed = 'Login failed. Please check your credentials.'
+    errors.value.loginFailed = 'Error al iniciar sesión. Por favor verifica tus credenciales.'
   }
 }
 
@@ -61,20 +64,9 @@ const onSubmit = () => {
 }
 </script>
 
-
 <template>
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
     <div class="position-relative my-sm-16">
-      <!-- <VNodeRenderer
-        :nodes="h('div', { innerHTML: authV1TopShape })"
-        class="text-primary auth-v1-top-shape d-none d-sm-block"
-      /> -->
-
-      <!-- <VNodeRenderer
-        :nodes="h('div', { innerHTML: authV1BottomShape })"
-        class="text-primary auth-v1-bottom-shape d-none d-sm-block"
-      /> -->
-
       <VCard
         class="auth-card pa-4"
         max-width="448"

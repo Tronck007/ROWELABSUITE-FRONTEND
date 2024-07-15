@@ -28,11 +28,22 @@ export const useAuthStore = defineStore("auth", {
       };
 
       try {
-        const { token, refreshToken, abilityRules, userData } =
-          await apiLogin(enhancedCredentials);
-        this.setAuthData(token, refreshToken, abilityRules, userData);
+        const response = await apiLogin(enhancedCredentials);
+
+        console.log("Login response:", response); // Depuración
+
+        const { status } = response.meta;
+
+        if (status === 401) {
+          notify("auth", "loginFail");
+          return;
+        }
+
+        if (status === 200) {
+          const { token, refreshToken, abilityRules, userData } = response;
+          this.setAuthData(token, refreshToken, abilityRules, userData);
+        }
       } catch (error) {
-        console.error("Login error:", error);
         throw new Error("Login failed. Please check your credentials.");
       }
     },

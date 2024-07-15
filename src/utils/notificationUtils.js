@@ -1,11 +1,12 @@
-import { toast } from 'vue3-toastify'
-import 'vue3-toastify/dist/index.css'
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 // Mensajes definidos para diferentes acciones y resultados
 const messages = {
   creation: {
     ok: "¡Excelente! El elemento se ha creado con éxito 😎👍",
-    empty: "No se puede crear un elemento vacío. Por favor, completa los campos requeridos 📝",
+    empty:
+      "No se puede crear un elemento vacío. Por favor, completa los campos requeridos 📝",
     fail: "Parece que hubo un problema creando el elemento 😢",
   },
   update: {
@@ -31,15 +32,23 @@ const messages = {
     empty: "No se encontraron Id de muestra válidos para agregar 🚫📦",
     ok: "Id de muestra añadida correctamente ✅📦",
   },
-}
+};
 
 // Función para disparar notificaciones
 export const notify = (action, result) => {
-  const message = messages[action][result]
+  const message = messages[action][result];
 
-  if (result === 'ok') {
-    toast.success(message, { position: toast.POSITION.TOP_RIGHT, autoClose: 3000, transition: 'zoom' })
+  if (result === "ok") {
+    toast.success(message, {
+      position: toast.POSITION.TOP_RIGHT,
+      autoClose: 3000,
+      transition: "zoom",
+    });
   } else {
-    toast.error(message, { position: toast.POSITION.TOP_RIGHT, autoClose: 3000, transition: 'zoom' })
+    toast.error(message, {
+      position: toast.POSITION.TOP_RIGHT,
+      autoClose: 5000,
+      transition: "zoom",
+    });
   }
-}
+};
