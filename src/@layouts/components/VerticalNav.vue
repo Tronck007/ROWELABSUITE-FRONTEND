@@ -12,11 +12,7 @@ import { injectionKeyIsVerticalNavHovered } from '@layouts/symbols'
 
 const props = defineProps({
   tag: {
-    type: [
-      String,
-      Object,
-      Function,
-    ],
+    type: null,
     required: false,
     default: 'aside',
   },
@@ -95,7 +91,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
           <Transition name="vertical-nav-app-title">
             <h1
               v-show="!hideTitleAndIcon"
-              class="app-logo-title leading-normal"
+              class="app-logo-title"
             >
               {{ layoutConfig.app.title }}
             </h1>
@@ -161,7 +157,8 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
   .app-logo-title {
     font-size: 1.375rem;
     font-weight: 700;
-    line-height: 1.75rem;
+    letter-spacing: 0.25px;
+    line-height: 1.5rem;
     text-transform: capitalize;
   }
 }
@@ -232,7 +229,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
 }
 
 // Small screen vertical nav transition
-@media (max-width:1279px) {
+@media (max-width: 1279px) {
   .layout-vertical-nav {
     &:not(.visible) {
       transform: translateX(-#{variables.$layout-vertical-nav-width});

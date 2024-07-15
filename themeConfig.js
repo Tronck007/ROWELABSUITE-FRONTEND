@@ -1,36 +1,44 @@
-import { defineThemeConfig } from '@core'
-import { Skins } from '@core/enums'
-import { breakpointsVuetify } from '@vueuse/core'
-import { VIcon } from 'vuetify/components/VIcon'
+import { defineThemeConfig } from "@core";
+import { Skins } from "@core/enums";
+import { breakpointsVuetify } from "@vueuse/core";
+import { VIcon } from "vuetify/components/VIcon";
 
 // ❗ Logo SVG must be imported with ?raw suffix
-import logo from '@images/Logo-ROWE.svg?raw'
-import { AppContentLayoutNav, ContentWidth, FooterType, NavbarType } from '@layouts/enums'
+import logo from "@images/Logo-ROWE.svg?raw";
+import {
+  AppContentLayoutNav,
+  ContentWidth,
+  FooterType,
+  NavbarType,
+} from "@layouts/enums";
 
 export const { themeConfig, layoutConfig } = defineThemeConfig({
   app: {
-    title: 'ROW-LAB',
-    logo: h('div', { innerHTML: logo, style: 'line-height:0; color: rgb(var(--v-global-theme-primary))' }),
+    title: "LAB-SUITE",
+    logo: h("div", {
+      innerHTML: logo,
+      style: "line-height:0; color: rgb(var(--v-global-theme-primary))",
+    }),
     contentWidth: ContentWidth.Fluid,
     contentLayoutNav: AppContentLayoutNav.Vertical,
     overlayNavFromBreakpoint: breakpointsVuetify.md + 16,
     i18n: {
       enable: true,
-      defaultLocale: 'es',
+      defaultLocale: "es",
       langConfig: [
         {
-          label: 'English',
-          i18nLang: 'en',
+          label: "English",
+          i18nLang: "en",
           isRTL: false,
         },
         {
-          label: 'Español',
-          i18nLang: 'es',
+          label: "Español",
+          i18nLang: "es",
           isRTL: false,
-        },    
+        },
       ],
     },
-    theme: 'light',
+    theme: "light",
     skin: Skins.Default,
     iconRenderer: VIcon,
   },
@@ -41,12 +49,12 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
   footer: { type: FooterType.Static },
   verticalNav: {
     isVerticalNavCollapsed: false,
-    defaultNavItemIconProps: { icon: 'tabler-circle', size: 10 },
+    defaultNavItemIconProps: { icon: "tabler-circle", size: 10 },
     isVerticalNavSemiDark: true,
   },
   horizontalNav: {
-    type: 'sticky',
-    transition: 'slide-x',
+    type: "sticky",
+    transition: "slide-x",
   },
 
   /*
@@ -54,11 +62,11 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
     // Such as: chevronDown: { icon: 'tabler-chevron-down', color:'primary', size: '24' },
     */
   icons: {
-    chevronDown: { icon: 'tabler-chevron-down' },
-    chevronRight: { icon: 'tabler-chevron-right', size: 18 },
-    close: { icon: 'tabler-x' },
-    verticalNavPinned: { icon: 'tabler-circle-dot' },
-    verticalNavUnPinned: { icon: 'tabler-circle' },
-    sectionTitlePlaceholder: { icon: 'tabler-separator' },
+    chevronDown: { icon: "tabler-chevron-down" },
+    chevronRight: { icon: "tabler-chevron-right", size: 18 },
+    close: { icon: "tabler-x" },
+    verticalNavPinned: { icon: "tabler-circle-dot" },
+    verticalNavUnPinned: { icon: "tabler-circle" },
+    sectionTitlePlaceholder: { icon: "tabler-separator" },
   },
-})
+});

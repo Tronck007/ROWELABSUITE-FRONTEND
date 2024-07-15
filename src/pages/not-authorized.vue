@@ -12,6 +12,7 @@ definePage({
   },
 })
 
+
 const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
 </script>
 

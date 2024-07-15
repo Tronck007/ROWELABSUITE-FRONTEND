@@ -1,3 +1,6 @@
+<!-- eslint-disable arrow-parens -->
+<!-- eslint-disable padding-line-between-statements -->
+<!-- eslint-disable newline-before-return -->
 <script setup>
 import { useBatchStore } from '@/stores/apps/control-labs-traceability'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
@@ -125,17 +128,12 @@ const handlePopState = (event) => {
                     Laboratorio Rowe
                   </h4>
                 </div>
-                <p>
-                  Office 149, 450 South Brand Brooklyn<br>
-                  San Diego County, CA 91905, USA<br>
-                  +1 (123) 456 7891, +44 (876) 543 2198
-                </p>
               </div>
               <!-- 👉 Right Content -->
               <div class="mt-4 ma-sm-4">
                 <!-- 👉 Invoice ID -->
                 <h4 class="font-weight-medium text-h4">
-                  N.Lote # {{ lote }}
+                  Número de lote # <strong>{{ lote }}</strong>
                 </h4>
                 <!-- 👉 Issue Date -->
                 <p class="my-3">
@@ -149,7 +147,7 @@ const handlePopState = (event) => {
           <!-- 👉 Payment Details -->
           <VCardText class="d-flex justify-space-between flex-wrap flex-column flex-sm-row print-row">
             <div class="ma-sm-4">
-              <h6 class="text-base font-weight-medium mb-6">
+              <h6 class="text-base font-weight-medium mb-3">
                 Generado Por:
               </h6>
               <strong>
@@ -173,7 +171,7 @@ const handlePopState = (event) => {
                   <th>Equipos</th>
                   <th>Descripción</th>
                   <th>Uso del equipo</th>
-                  <th>Técnico</th>
+                  <!-- <th>Técnico</th> -->
                 </tr>
               </thead>
               <tbody>
@@ -190,19 +188,19 @@ const handlePopState = (event) => {
                         :key="`horario-${horarioIndex}`"
                       >
                         <div>
-                          {{ horario.inicio }} - {{ horario.fin }} - Tiempo total: ({{ horario.tiempo }})
+                          {{ horario.inicio }} => {{ horario.fin }} => Tiempo total: ({{ horario.tiempo }}) => TÉCNICO: {{ horario.tecnico }}
                         </div>
                         <div>{{ horario.prueba }}</div>
                       </template>
                     </td>
-                    <td>
+                    <!-- <td>
                       <template
                         v-for="(horario, horarioIndex) in equipment.horarios"
                         :key="`tecnico-${horarioIndex}`"
                       >
                         <div>{{ horario.tecnico }}</div>
                       </template>
-                    </td>
+                    </td> -->
                   </tr>
                 </template>
               </tbody>

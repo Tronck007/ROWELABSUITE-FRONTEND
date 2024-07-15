@@ -24,6 +24,7 @@ function formatIsoDateTimeToReadable(dateTimeString) {
     minute: "2-digit",
     second: "2-digit",
   };
+
   return new Date(dateTimeString).toLocaleString("es-ES", options);
 }
 
@@ -92,7 +93,9 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
   actions: {
     async createTestProcess(processId, equipmentInfo) {
       const userData = useCookie("userData").value; // Asegúrate de obtener el valor actual del cookie aquí
-      const { test, hora, minutos, equipment, samples } = equipmentInfo;
+
+      const { test, hora, minutos, equipment, samples, comment } =
+        equipmentInfo;
 
       const totalMinutos = hora * 60 + minutos;
       const start = getDominicanRepublicDateTime(); // Usamos la fecha obtenida de getDominicanRepublicDateTime
@@ -109,6 +112,7 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
             equipment_process: {
               status: "in_process",
               process_details: "In process",
+              comment,
               expected_start_time: convertDateTime(start),
               expected_end_time: convertDateTime(end),
             },
@@ -219,6 +223,7 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
           processCode,
           updatedData,
         );
+
         const { body } = response;
         const { meta } = body;
 

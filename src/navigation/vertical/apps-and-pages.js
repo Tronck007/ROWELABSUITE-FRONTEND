@@ -1,21 +1,30 @@
+/* eslint-disable semi */
 export default [
   { heading: "Apps" },
-
   {
     title: "Control Lab Traceability",
     icon: { icon: "tabler-hexagons" },
     children: [
       {
-        title: "Proceso ",
-        to: "apps-control-labs-traceability-process-samples",
+        title: "Proceso",
+        to: {
+          name: "apps-control-labs-traceability-process-samples",
+          meta: { action: "read", subject: "Process" },
+        },
       },
       {
         title: "Histórico",
-        to: "apps-control-labs-traceability-process-samples-history",
+        to: {
+          name: "apps-control-labs-traceability-process-samples-history",
+          meta: { action: "read", subject: "Process" },
+        },
       },
       {
         title: "Board",
-        to: "apps-control-labs-traceability-equipment-board-equipment",
+        to: {
+          name: "apps-control-labs-traceability-equipment-board-equipment",
+          meta: { action: "read", subject: "Process-Equipment" },
+        },
       },
       {
         title: "Equipos",
@@ -23,11 +32,17 @@ export default [
         children: [
           {
             title: "Listado",
-            to: "apps-control-labs-traceability-equipment-list-equipment",
+            to: {
+              name: "apps-control-labs-traceability-equipment-list-equipment",
+              meta: { action: "read", subject: "Equipment-Catalog" },
+            },
           },
           {
             title: "Reportes Abiertos",
-            to: "apps-control-labs-traceability-reports-report-equipment",
+            to: {
+              name: "apps-control-labs-traceability-reports-report-equipment",
+              meta: { action: "read", subject: "Report-Equipment" },
+            },
           },
         ],
       },

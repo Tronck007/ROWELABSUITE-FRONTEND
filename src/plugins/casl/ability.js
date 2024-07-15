@@ -1,3 +1,3 @@
-import { createMongoAbility } from '@casl/ability'
+import { createMongoAbility } from "@casl/ability";
 
-export const ability = createMongoAbility()
+export const ability = createMongoAbility();

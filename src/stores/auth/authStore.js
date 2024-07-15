@@ -1,79 +1,103 @@
-import { defineStore } from 'pinia'
-// eslint-disable-next-line import/no-unresolved
-import UAParser from 'ua-parser-js'
-// eslint-disable-next-line import/no-unresolved
-import { apiLogin, apiRefreshToken } from '@/services/auth/authService'
+/* eslint-disable padding-line-between-statements */
+/* eslint-disable newline-before-return */
+/* eslint-disable arrow-parens */
+/* eslint-disable semi */
+import { defineStore } from "pinia";
+import UAParser from "ua-parser-js";
+import { apiLogin, apiRefreshToken } from "@/services/auth/authService";
+import { ability } from "@/plugins/casl/ability";
 
-
-
-export const useAuthStore = defineStore('auth', {
+export const useAuthStore = defineStore("auth", {
   state: () => ({
-    accessToken: useCookie('accessToken').value, // Utilizar directamente useCookie
-    userData: useCookie('userData').value,
-    userAbilityRules: useCookie('userAbilityRules').value,
+    accessToken: useCookie("accessToken").value,
+    refreshToken: useCookie("refreshToken").value,
+    userData: useCookie("userData").value,
+    abilityRules: useCookie("abilityRules").value,
   }),
   actions: {
     async login(credentials) {
-      try {     
+      const parser = new UAParser();
+      const result = parser.getResult();
+      const userAgent = `${result.browser.name} ${result.browser.version} | ${result.os.name} ${result.os.version}`;
+      const authType = "Control Lab Traceability";
 
+      const enhancedCredentials = {
+        ...credentials,
+        userAgent,
+        authType,
+      };
 
-        const parser = new UAParser()
-        const result = parser.getResult()
-        let userAgent = `${result.browser.name + ' ' + result.browser.version} | ${result.os.name + ' ' + result.os.version}`
-        let authType = 'Control Lab Traceability'
-        
-        const enhancedCredentials = {
-          userCode: credentials.userCode,
-          password: credentials.password,
-          userAgent: userAgent,
-          authType: authType,
-        }   
-        
-        const { meta, token, userData, userAbilityRules } = await apiLogin(enhancedCredentials)
-        
-
-        if (meta.status !== 200) {
-          throw new Error(meta.message)
-        }
-
-        this.setAuthData(token, userData, userAbilityRules)     
-
-        return { token, userData, userAbilityRules }
+      try {
+        const { token, refreshToken, abilityRules, userData } =
+          await apiLogin(enhancedCredentials);
+        this.setAuthData(token, refreshToken, abilityRules, userData);
       } catch (error) {
-        console.error('Login error:', error)
-        throw error
+        console.error("Login error:", error);
+        throw new Error("Login failed. Please check your credentials.");
       }
-    },
-    logout() {
-      this.clearAuthData()
     },
     async refreshToken() {
-      const refreshToken = useCookie('refreshToken').value
       try {
-        const { token, userData, userAbilityRules } = await apiRefreshToken(refreshToken)
-
-        this.setAuthData(token, userData, userAbilityRules)
+        const { token, userData, abilityRules } = await apiRefreshToken(
+          this.refreshToken,
+        );
+        this.setAuthData(token, this.refreshToken, abilityRules, userData);
       } catch (error) {
-        console.error('Refresh token error:', error)
-        this.clearAuthData()
-        throw error
+        console.error("Refresh token error:", error);
+        this.clearAuthData();
+        throw error;
       }
     },
-    setAuthData(token, userData, userAbilityRules) {
-      useCookie('accessToken').value = token
-      useCookie('userData').value = userData
-      useCookie('userAbilityRules').value = userAbilityRules
-      this.accessToken = token
-      this.userData = userData
-      this.userAbilityRules = userAbilityRules
+    setAuthData(token, refreshToken, abilityRules, userData) {
+      useCookie("accessToken").value = token;
+      useCookie("refreshToken").value = refreshToken;
+      useCookie("userData").value = userData;
+      useCookie("abilityRules").value = abilityRules;
+      this.accessToken = token;
+      this.refreshToken = refreshToken;
+      this.userData = userData;
+      this.abilityRules = abilityRules;
+
+      // Actualiza las habilidades en CASL
+      ability.update(abilityRules);
+      console.log("User data set:", userData); // Depuración
+      console.log("Ability rules set:", abilityRules); // Depuración
     },
     clearAuthData() {
-      useCookie('accessToken').value = null
-      useCookie('userData').value = null
-      useCookie('userAbilityRules').value = null
-      this.accessToken = null
-      this.userData = null
-      this.userAbilityRules = null
+      useCookie("accessToken").value = null;
+      useCookie("refreshToken").value = null;
+      useCookie("userData").value = null;
+      useCookie("abilityRules").value = null;
+      this.accessToken = null;
+      this.refreshToken = null;
+      this.userData = null;
+      this.abilityRules = null;
+
+      // Resetea las habilidades en CASL
+      ability.update([]);
+    },
+    async logout() {
+      try {
+        // Puedes llamar a un endpoint API para invalidar el token si es necesario
+        // await apiLogout();
+
+        // Limpia los datos de autenticación
+        this.clearAuthData();
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
     },
   },
-})
+  getters: {
+    userName: (state) =>
+      state.userData ? state.userData.email.split("@")[0] : "",
+    userRole: (state) => (state.userData ? state.userData.role : ""),
+    userInitials: (state) => {
+      if (state.userData && state.userData.full_name) {
+        const [firstName, secondName] = state.userData.full_name.split(" ");
+        return `${firstName[0]}${secondName[0]}`.toUpperCase();
+      }
+      return "";
+    },
+  },
+});

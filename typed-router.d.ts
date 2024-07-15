@@ -46,14 +46,18 @@ declare module 'vue-router/auto/routes' {
     'apps-control-labs-traceability-process-samples': RouteRecordInfo<'apps-control-labs-traceability-process-samples', '/apps/control-labs-traceability/process/samples', Record<never, never>, Record<never, never>>,
     'apps-control-labs-traceability-process-samples-history': RouteRecordInfo<'apps-control-labs-traceability-process-samples-history', '/apps/control-labs-traceability/process/samples-history', Record<never, never>, Record<never, never>>,
     'apps-control-labs-traceability-process-samples-process': RouteRecordInfo<'apps-control-labs-traceability-process-samples-process', '/apps/control-labs-traceability/process/samples-process', Record<never, never>, Record<never, never>>,
+    'apps-control-labs-traceability-process-visitor-page': RouteRecordInfo<'apps-control-labs-traceability-process-visitor-page', '/apps/control-labs-traceability/process/VisitorPage', Record<never, never>, Record<never, never>>,
     'apps-control-labs-traceability-reports-lot-print': RouteRecordInfo<'apps-control-labs-traceability-reports-lot-print', '/apps/control-labs-traceability/reports/lot-print', Record<never, never>, Record<never, never>>,
     'apps-control-labs-traceability-reports-report-equipment': RouteRecordInfo<'apps-control-labs-traceability-reports-report-equipment', '/apps/control-labs-traceability/reports/report-equipment', Record<never, never>, Record<never, never>>,
     'dashboards-control-lab-board': RouteRecordInfo<'dashboards-control-lab-board', '/dashboards/control-lab-board', Record<never, never>, Record<never, never>>,
+    'dashboards-login-x': RouteRecordInfo<'dashboards-login-x', '/dashboards/loginX', Record<never, never>, Record<never, never>>,
     'dashboards-reservaciones-board': RouteRecordInfo<'dashboards-reservaciones-board', '/dashboards/reservaciones-board', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
     'login2': RouteRecordInfo<'login2', '/login2', Record<never, never>, Record<never, never>>,
+    'login3': RouteRecordInfo<'login3', '/login3', Record<never, never>, Record<never, never>>,
     'not-authorized': RouteRecordInfo<'not-authorized', '/not-authorized', Record<never, never>, Record<never, never>>,
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
+    'visitor-control': RouteRecordInfo<'visitor-control', '/visitor-control', Record<never, never>, Record<never, never>>,
   }
 }
 

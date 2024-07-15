@@ -1,61 +1,73 @@
 <script setup>
-import { ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
-import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
-import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
-import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
-import authV2MaskDark from '@images/pages/misc-mask-dark.png'
-import authV2MaskLight from '@images/pages/misc-mask-light.png'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
-import { useAuthStore } from '@/stores/auth/authStore'
+import { useAuthStore } from "@/stores/auth/authStore"
 
-const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
-const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+import authV1BottomShape from "@images/svg/auth-v1-bottom-shape.svg?raw"
+import authV1TopShape from "@images/svg/auth-v1-top-shape.svg?raw"
+import { VNodeRenderer } from "@layouts/components/VNodeRenderer"
+import { themeConfig } from "@themeConfig"
+
+
+const ability = useAbility()
 
 definePage({
   meta: {
-    layout: 'blank',
+    layout: "blank",
     unauthenticatedOnly: true,
   },
 })
 
-const isPasswordVisible = ref(false)
+const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
+
+const isPasswordVisible = ref(false)
+const rememberMe = ref(false)
+const refVForm = ref()
+
+
+
+
 
 const errors = ref({
   userCode: undefined,
   password: undefined,
+  loginFailed: undefined, // Para mostrar errores de login
 })
-
-const refVForm = ref()
 
 const credentials = ref({
-  userCode: '',
-  password: '',
+  userCode: "",
+  password: "",
 })
 
-const rememberMe = ref(false)
-
-const login = async () => {
+const handleLogin = async () => {
   try {
-    await authStore.login(credentials.value)
-    await router.replace(route.query.to ? String(route.query.to) : '/')
+    // Llama a login y actualiza las reglas de Ability directamente en el store
+    const { userAbilityRules } = await authStore.login({
+      userCode: credentials.value.userCode,
+      password: credentials.value.password,
+    })
+
+
+
+    ability.update(userAbilityRules)
+
+    await nextTick(() => {
+      router.replace(route.query.to ? String(route.query.to) : '/')
+    })
+
+    // ability.update(response.userAbilityRules)
+    router.replace("/")
   } catch (err) {
-    console.error('Login error:', err)
-    errors.value.loginFailed = 'Login failed. Please check your credentials.'
+    console.error("Login error:", err)
+    errors.value.loginFailed = "Login failed. Please check your credentials." // Ajustar mensaje según el error
   }
 }
 
-const onSubmit = () => {
-  refVForm.value?.validate().then(({ valid: isValid }) => {
+const onSubmit = async () => {
+  refVForm.value?.validate().then(async ({ valid: isValid }) => {
     if (isValid) {
       errors.value.loginFailed = undefined // Reinicia el estado de error de login
-      login()
+      await handleLogin()
     }
   })
 }
@@ -65,16 +77,19 @@ const onSubmit = () => {
 <template>
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
     <div class="position-relative my-sm-16">
-      <!-- <VNodeRenderer
+      <!-- 👉 Top shape -->
+      <VNodeRenderer
         :nodes="h('div', { innerHTML: authV1TopShape })"
         class="text-primary auth-v1-top-shape d-none d-sm-block"
-      /> -->
+      />
 
-      <!-- <VNodeRenderer
+      <!-- 👉 Bottom shape -->
+      <VNodeRenderer
         :nodes="h('div', { innerHTML: authV1BottomShape })"
         class="text-primary auth-v1-bottom-shape d-none d-sm-block"
-      /> -->
+      />
 
+      <!-- 👉 Auth Card -->
       <VCard
         class="auth-card pa-4"
         max-width="448"
@@ -102,8 +117,9 @@ const onSubmit = () => {
           <VForm
             ref="refVForm"
             @submit.prevent="onSubmit"
-          >
+          > 
             <VRow>
+              <!-- email -->
               <VCol cols="12">
                 <AppTextField
                   v-model="credentials.userCode"
@@ -112,10 +128,11 @@ const onSubmit = () => {
                   type="number"
                   autofocus
                   :rules="[requiredValidator]"
-                  :error-messages="errors.userCode"
+                  :error-messages="errors.user_code"
                 />
               </VCol>
 
+              <!-- password -->
               <VCol cols="12">
                 <AppTextField
                   v-model="credentials.password"
@@ -130,13 +147,15 @@ const onSubmit = () => {
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
                 />
 
+                <!-- remember me checkbox -->
                 <div class="d-flex align-center justify-space-between flex-wrap mt-2 mb-4">
                   <VCheckbox
                     v-model="rememberMe"
-                    label="Recuerdame"
+                    label="Recuerdame" 
                   />
                 </div>
 
+                <!-- login button -->
                 <VBtn
                   block
                   type="submit"

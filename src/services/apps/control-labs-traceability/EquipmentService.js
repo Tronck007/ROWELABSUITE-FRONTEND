@@ -11,8 +11,11 @@ class EquipmentService extends ApiService {
     return this.fetchAll(`process`);
   }
 
-  async getAllEquipment() {
+  async getAllEquipmentStatus() {
     return this.fetchAll(`equipment/status`);
+  }
+  async getAllEquipment() {
+    return this.fetchAll(`equipment`);
   }
 
   async getProcessById(id) {

@@ -1,7 +1,8 @@
 /* eslint-disable sonarjs/no-identical-conditions */
 /* eslint-disable sonarjs/no-duplicated-branches */
 /* eslint-disable semi */
-export const resolveStatusVariant = (status) => {
+export const resolveStatusVariant = (status, state) => {
+  console.log("state", status);
   if (status === "created") {
     return {
       color: "primary",
@@ -12,10 +13,15 @@ export const resolveStatusVariant = (status) => {
       color: "success",
       text: "Completo",
     };
+  } else if (state === true || status === "active") {
+    return {
+      color: "success",
+      text: "Activo",
+    };
   } else if (
+    status === "in_process" ||
     status === "In Process" ||
-    status === true ||
-    status === "in_process"
+    status === true
   ) {
     return {
       color: "info",
@@ -31,10 +37,15 @@ export const resolveStatusVariant = (status) => {
       color: "warning",
       text: "Reservado",
     };
+  } else if (status === "fault") {
+    return {
+      color: "error",
+      text: "Error",
+    };
   } else {
     return {
-      color: "success",
-      text: "Completo",
+      color: "default",
+      text: "Desconocido",
     };
   }
 };

@@ -365,6 +365,7 @@
     "initSwiper": true,
     "notify": true,
     "getDominicanRepublicDateTime": true,
-    "getDominicanRepublicDateOnly": true
+    "getDominicanRepublicDateOnly": true,
+    "defineAbilitiesFor": true
   }
 }

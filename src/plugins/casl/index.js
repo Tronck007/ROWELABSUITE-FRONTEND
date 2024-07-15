@@ -1,11 +1,16 @@
-import { createMongoAbility } from '@casl/ability'
-import { abilitiesPlugin } from '@casl/vue'
+import { abilitiesPlugin } from "@casl/vue";
+import { useAuthStore } from "@/stores/auth/authStore"; // Asegúrate de la ruta correcta
+import { ability } from "./ability";
 
 export default function (app) {
-  const userAbilityRules = useCookie('userAbilityRules')
-  const initialAbility = createMongoAbility(userAbilityRules.value ?? [])
+  const authStore = useAuthStore();
+  const userAbilityRules = authStore.abilityRules || [];
+  console.log("Initializing CASL with rules:", userAbilityRules);
 
-  app.use(abilitiesPlugin, initialAbility, {
+  ability.update(userAbilityRules);
+  console.log("Initialized ability:", ability);
+
+  app.use(abilitiesPlugin, ability, {
     useGlobalProperties: true,
-  })
+  });
 }

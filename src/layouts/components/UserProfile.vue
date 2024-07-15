@@ -1,14 +1,15 @@
 <script setup>
-import { useAuthStore } from "@/stores/auth/authStore";
-import { useTheme } from "../../stores/theme/theme";
+import { useAuthStore } from "@/stores/auth/authStore"
+import { useTheme } from "@/stores/theme/theme"
+import { useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 
 
 //OPEN CONFIGURATION
 const theme = useTheme()
 const authStore = useAuthStore()
-
-
 const router = useRouter()
+
 
 // Definir una referencia para el temporizador
 let inactivityTimer = ref(null)
@@ -51,31 +52,14 @@ const handleClick = () => {
   theme.toggleNavDrawer()
 }
 
-
 const logout = async () => {
   await authStore.logout()
   router.replace("/login")
 }
 
-
-const userProfileList = [
-  {
-    type: "navItem",
-    icon: "tabler-adjustments",
-    title: "Settings",
-
-  },
-
-  { type: "divider" },
-  {
-    type: "navItem",
-    icon: "tabler-logout",
-    title: "Logout",
- 
-  },
-]
-
-import avatar1 from '@images/avatars/avatar-1.png';
+const userName = computed(() => authStore.userName)
+const userRole = computed(() => authStore.userRole)
+const userInitials = computed(() => authStore.userInitials)
 </script>
 
 <template>
@@ -92,7 +76,7 @@ import avatar1 from '@images/avatars/avatar-1.png';
       color="primary"
       variant="tonal"
     >
-      <VImg :src="avatar1" />
+      <span>{{ userInitials }}</span>
 
       <!-- SECTION Menu -->
       <VMenu
@@ -117,32 +101,19 @@ import avatar1 from '@images/avatars/avatar-1.png';
                     color="primary"
                     variant="tonal"
                   >
-                    <VImg :src="avatar1" />
+                    <span>{{ userInitials }}</span>
                   </VAvatar>
                 </VBadge>
               </VListItemAction>
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              John Doe
+              {{ userName }}
             </VListItemTitle>
-            <VListItemSubtitle>Admin</VListItemSubtitle>
+            <VListItemSubtitle>{{ userRole }}</VListItemSubtitle>
           </VListItem>
 
           <VDivider class="my-2" />
-
-          <!-- 👉 Profile -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-user"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>Profile</VListItemTitle>
-          </VListItem>
 
           <!-- 👉 Settings -->
           <VListItem
@@ -157,33 +128,7 @@ import avatar1 from '@images/avatars/avatar-1.png';
               />
             </template>
 
-            <VListItemTitle>Settings</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 Pricing -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-currency-dollar"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>Pricing</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 FAQ -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-help"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>FAQ</VListItemTitle>
+            <VListItemTitle>Configuraciones</VListItemTitle>
           </VListItem>
 
           <!-- Divider -->
@@ -199,11 +144,22 @@ import avatar1 from '@images/avatars/avatar-1.png';
               />
             </template>
 
-            <VListItemTitle>Logout</VListItemTitle>
+            <VListItemTitle>Cerrar Sesión</VListItemTitle>
           </VListItem>
         </VList>
       </VMenu>
-      <!-- !SECTION -->
     </VAvatar>
   </VBadge>
 </template>
+
+<style scoped>
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+</style>

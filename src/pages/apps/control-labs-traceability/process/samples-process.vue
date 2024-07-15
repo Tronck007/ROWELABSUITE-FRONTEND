@@ -103,12 +103,12 @@ onMounted( async() => {
     @update:isDialogVisible="closeDialog"
   />
   
-  <div class="section-container">
+  <div class="section-container section-process">
     <div
       :class="{ 'loading-title-animate': isLoadingAnimation }"
       class="section-title"
     >
-      EQUIPOS EN PROCESO
+      EQUIPOS EN PROCESOS
     </div>
   </div>
   <TableView
@@ -121,7 +121,7 @@ onMounted( async() => {
     @finishProcess="handleFinishProcess"
   />
 
-  <div class="section-container">
+  <div class="section-container section-reserved">
     <div
       :class="{ 'loading-title-animate': isLoadingAnimation }"
       class="section-title"
@@ -140,7 +140,7 @@ onMounted( async() => {
     @finishProcess="handleFinishProcess"
   />
 
-  <div class="section-container">
+  <div class="section-container section-finished">
     <div
       :class="{ 'loading-title-animate': isLoadingAnimation }"
       class="section-title"
@@ -171,7 +171,7 @@ onMounted( async() => {
 .section-title {
   position: relative;
   font-weight: bold;
-  padding-inline-end: 20px;
+  padding-inline-end: 20px; /* Espaciado para el texto */
 }
 
 .section-title::before,
@@ -226,3 +226,4 @@ onMounted( async() => {
   margin-bottom: 20px;
 }
 </style>
+

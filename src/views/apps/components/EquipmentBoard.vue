@@ -96,7 +96,7 @@ const visibleGroupedEquipment = computed(() => {
 })
 
 onMounted(async () => {
-  await equipmentStore.fetchAllEquipment()
+  await equipmentStore.fetchAllEquipmentStatus()
   equipmentStore.initializeIndexes()
 
   setInterval(() => {
