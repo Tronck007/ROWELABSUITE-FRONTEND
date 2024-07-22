@@ -1,17 +1,17 @@
-import ApiService from '../../ApiService'
+import ApiService from "../../ApiService";
 
 class TestEquipmentService extends ApiService {
   constructor() {
-    super('control_lab_traceability')
+    super("control_lab_traceability");
   }
 
   async createTests(processData) {
-    return this.create(processData, 'test')
+    return this.create(processData, "test");
   }
   async createEquipment(processData) {
-    return this.create(processData, 'equipment')
+    return this.create(processData, "equipment");
   }
 }
 
 // Creando e exportando una instancia de TestEquipmentService
-export const testEquipmentService = new TestEquipmentService()
+export const testEquipmentService = new TestEquipmentService();

@@ -23,14 +23,10 @@ class EquipmentService extends ApiService {
   }
 
   async getSamplingById(id) {
-    // Asumiendo que hay un error en la ruta proporcionada en tu código original,
-    // y que deberías usar la estructura base de la clase para acceder a 'samples'.
     return this.fetchById(`catalog/sample/${id}`);
   }
 
   async createEquipmentProcess(equipment) {
-    console.log("process", process);
-
     return this.create("equipment", equipment);
   }
 

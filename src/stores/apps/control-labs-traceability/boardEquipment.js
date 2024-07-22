@@ -1,7 +1,5 @@
-/* eslint-disable indent */
-/* eslint-disable camelcase */
-/* eslint-disable arrow-parens */
 /* eslint-disable semi */
+/* eslint-disable camelcase */
 import { defineStore } from "pinia";
 import { equipmentService } from "@/services/apps/control-labs-traceability/EquipmentService";
 import libreImage from "@images/status/Libre.png";
@@ -11,12 +9,12 @@ import noAnilibleImage from "@images/status/NoDisponible.png";
 import placeholderImage from "@images/status/placeholder.png";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
+const userData = useCookie("userData").value;
 
 export const useEquipmentStore = defineStore("equipment", {
   state: () => ({
     originalData: [],
     isLoading: false,
-    currentIndexes: {},
     headers: [
       { title: "EQUIPO", key: "equipment_name" },
       { title: "DESCRIPCIÓN", key: "equipment_desc" },
@@ -32,7 +30,6 @@ export const useEquipmentStore = defineStore("equipment", {
       this.isLoading = true;
       try {
         const { data } = await equipmentService.getAllEquipmentStatus();
-
         this.originalData = data.map((item, index) => ({
           id: index + 1,
           _id: item._id,
@@ -55,8 +52,12 @@ export const useEquipmentStore = defineStore("equipment", {
       this.isLoading = true;
       try {
         const { data } = await equipmentService.getAllEquipment();
+        this.originalData = data.map((item, index) => ({
+          ...item,
+          id: `${index}`,
+        }));
 
-        this.originalData = data;
+        console.log("originalData", this.originalData);
       } catch (error) {
         console.error("Error fetching equipment:", error);
       } finally {
@@ -78,7 +79,6 @@ export const useEquipmentStore = defineStore("equipment", {
       display_board,
     ) {
       const id = this.originalData.length + 1;
-
       this.originalData.push({
         id,
         type_object,
@@ -88,48 +88,6 @@ export const useEquipmentStore = defineStore("equipment", {
         imageUrl: `${IMAGE_BASE_URL}${imageUrl}`,
         display_board,
       });
-    },
-    initializeIndexes() {
-      for (const type in this.groupedEquipment) {
-        this.currentIndexes[type] = 0;
-      }
-    },
-    rotateVisibleEquipment() {
-      const equipmentTypes = Object.keys(this.groupedEquipment);
-
-      const currentIndex =
-        (this.currentIndexes.value + 6) % equipmentTypes.length;
-
-      this.currentIndexes.value = currentIndex;
-    },
-    rotateVisibleEquipmentCard() {
-      for (const type in this.currentIndexes) {
-        const group = this.groupedEquipment[type];
-        if (group.length > 4) {
-          this.currentIndexes[type] =
-            (this.currentIndexes[type] + 1) % group.length;
-        }
-      }
-    },
-    getVisibleEquipmentCard(equipmentGroup, equipmentType) {
-      const totalVisible = 4;
-      const visibleEquipment = [];
-      if (equipmentGroup.length < totalVisible) {
-        for (let i = 0; i < totalVisible; i++) {
-          visibleEquipment.push(
-            i < equipmentGroup.length ? equipmentGroup[i] : null,
-          );
-        }
-      } else {
-        for (let i = 0; i < totalVisible; i++) {
-          const index =
-            (this.currentIndexes[equipmentType] + i) % equipmentGroup.length;
-
-          visibleEquipment.push(equipmentGroup[index]);
-        }
-      }
-
-      return visibleEquipment;
     },
     async loadInitialData() {
       this.isLoading = true;
@@ -151,7 +109,6 @@ export const useEquipmentStore = defineStore("equipment", {
           }
           acc[equipment.type_object].push(equipment);
         }
-
         return acc;
       }, {});
     },
@@ -179,11 +136,10 @@ export const useEquipmentStore = defineStore("equipment", {
         in_process: "warning",
         fault: "error",
       };
-
       return colors[status] || "";
     },
-    transformedData(state) {
-      return state.originalData.map((data) => ({
+    equipmentTransformation: (state) => (equipmentData) => {
+      return equipmentData.map((data) => ({
         id: data.id,
         equipment_name: data.equipment_name,
         equipment_desc: data.equipment_desc,
@@ -192,8 +148,13 @@ export const useEquipmentStore = defineStore("equipment", {
         status: data.status,
         is_active: data.is_active,
         imageUrl: data.imageUrl,
-        program_end_equipment_process: data.program_end_equipment_process,
+        program_end_equipment_process: formatIsoDateTimeToReadable(
+          data.program_end_equipment_process,
+        ),
       }));
+    },
+    transformedData(state) {
+      return state.equipmentTransformation(state.originalData);
     },
     tableConfig(state) {
       return {
@@ -205,15 +166,14 @@ export const useEquipmentStore = defineStore("equipment", {
           searchInput: true,
           filterStatus: false,
         },
-        actionClicked: true,
-        expandedRows: true,
+        expandedRows: false,
         buttonConfigs: {
           main: {
-            showFinishButton: true,
+            showFinishButton: false,
             showEdit: true,
-            showDelete: true,
+            showDelete: false,
             showCheck: false,
-            showGoto: true,
+            showGoto: false,
           },
           sub: {
             showEdit: false,

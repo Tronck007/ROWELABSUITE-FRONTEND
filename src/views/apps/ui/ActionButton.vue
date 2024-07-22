@@ -1,3 +1,4 @@
+<!-- eslint-disable comma-dangle -->
 <!-- eslint-disable semi -->
 <!-- ActionButton.vue -->
 <script setup>
@@ -20,8 +21,18 @@ const props = defineProps({
   goToPage: String,
   item: {
     type: Object,
-    
   },
+  tooltips: {
+    type: Object,
+    default: () => ({
+      finishProcess: 'Terminar Proceso',
+      edit: 'Editar',
+      check: 'Marcar',
+      delete: 'Eliminar',
+      goTo: 'Ir a Página',
+      view: 'Visualizar PDF'
+    })
+  }
 });
 
 const emit = defineEmits(['edit', 'delete', 'check', 'goto', 'finishProcess', 'view']);
@@ -37,36 +48,85 @@ const handleView = () => emit('view', props.item);
 <template>
   <div>
     <template v-if="showFinishButton">
-      <IconBtn @click.stop="handleFinishProcess">
-        <VIcon icon="tabler-check" style="color: #4CAF50" />
-      </IconBtn>
+      <VTooltip location="top" :props="props">
+        <template #activator="{ props }">
+          <IconBtn @click.stop="handleFinishProcess" v-bind="props">
+            <VIcon
+              icon="tabler-check"
+              style="color: #4CAF50"
+            />
+          </IconBtn>
+        </template>
+        <span>{{ tooltips.finishProcess }}</span>
+      </VTooltip>
     </template>
     <template v-if="showEdit">
-      <IconBtn @click.stop="handleEdit">
-        <VIcon icon="tabler-edit" style="color: #00abfb" />
-      </IconBtn>
+      <VTooltip location="top" :props="props">
+        <template #activator="{ props }">
+          <IconBtn @click.stop="handleEdit" v-bind="props">
+            <VIcon
+              icon="tabler-edit"
+              style="color: #00abfb"
+            />
+          </IconBtn>
+        </template>
+        <span>{{ tooltips.edit }}</span>
+      </VTooltip>
     </template>
     <template v-if="showCheck">
-      <VCheckbox
-        :value="props.item"
-        @change="handleCheck"
-      />
+      <VTooltip location="top" :props="props">
+        <template #activator="{ props }">
+          <VCheckbox
+            :value="props.item"
+            @change="handleCheck"
+            v-bind="props"
+          />
+        </template>
+        <span>{{ tooltips.check }}</span>
+      </VTooltip>
     </template>
     <template v-if="showDelete">
-      <IconBtn :disabled="disableDelete" @click.stop="handleDelete">
-        <VIcon icon="tabler-trash" style="color: #ff4d4f" />
-      </IconBtn>
+      <VTooltip location="top" :props="props">
+        <template #activator="{ props }">
+          <IconBtn
+            :disabled="disableDelete"
+            @click.stop="handleDelete"
+            v-bind="props"
+          >
+            <VIcon
+              icon="tabler-trash"
+              style="color: #ff4d4f"
+            />
+          </IconBtn>
+        </template>
+        <span>{{ tooltips.delete }}</span>
+      </VTooltip>
     </template>
     <template v-if="showGoToButton">
-      <IconBtn @click.stop="handleGoTo">
-        <VIcon icon="tabler-arrow-right" style="color: #00abfb" />
-      </IconBtn>
+      <VTooltip location="top" :props="props">
+        <template #activator="{ props }">
+          <IconBtn @click.stop="handleGoTo" v-bind="props">
+            <VIcon
+              icon="tabler-arrow-right"
+              style="color: #00abfb"
+            />
+          </IconBtn>
+        </template>
+        <span>{{ tooltips.goTo }}</span>
+      </VTooltip>
     </template>
-    <template v-if="showView">
-      <IconBtn @click.stop="handleView">
-        <VIcon icon="tabler-eye" style="color: #4CAF50" />
-      </IconBtn>
-    </template>
+    <VTooltip location="top" :props="props">
+      <template v-if="showView" #activator="{ props }">
+        <IconBtn @click.stop="handleView" v-bind="props">
+          <VIcon
+            icon="tabler-eye"
+            style="color: #4CAF50"
+            v-bind="props"
+          />
+        </IconBtn>     
+      </template>
+      <span>{{ tooltips.view }}</span>
+    </VTooltip>
   </div>
 </template>
 

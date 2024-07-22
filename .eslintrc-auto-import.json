@@ -366,6 +366,7 @@
     "notify": true,
     "getDominicanRepublicDateTime": true,
     "getDominicanRepublicDateOnly": true,
-    "defineAbilitiesFor": true
+    "defineAbilitiesFor": true,
+    "colors": true
   }
 }

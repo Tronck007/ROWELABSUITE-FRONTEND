@@ -15,6 +15,7 @@ const currentProcess = computed(() => dialogStore.currentProcess)
 const samples = ref() // Almacenará la entrada de muestras
 const items = ref([]) // Almacena las muestras procesadas
 const colspan = ref(10) // Configuración de colspan para uso en la tabla
+const isButtonDisabled = computed(() => items.value.length === 0)
 
 // Configuración de los botones para la tabla
 const buttonConfigs = {
@@ -197,6 +198,7 @@ const handleSummit = () => {
         <VBtn
           type="submit"
           @click="handleSummit"
+          :disabled="isButtonDisabled"
         >
           <VIcon
             start

@@ -80,8 +80,6 @@ export const useReservationStore = defineStore("reservation", {
     },
 
     async deleteReservation(item) {
-      console.log("reservationData", item);
-
       const processCode = item.process_code;
       try {
         const updatedData = {

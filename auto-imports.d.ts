@@ -18,6 +18,7 @@ declare global {
   const can: typeof import('./src/utils/casl2.js')['can']
   const canNavigate: typeof import('./src/utils/casl2.js')['canNavigate']
   const canViewNavMenuGroup: typeof import('./src/utils/casl.js')['canViewNavMenuGroup']
+  const colors: typeof import('./src/utils/statusUtils.js')['colors']
   const computed: typeof import('vue')['computed']
   const computedAsync: typeof import('@vueuse/core')['computedAsync']
   const computedEager: typeof import('@vueuse/core')['computedEager']

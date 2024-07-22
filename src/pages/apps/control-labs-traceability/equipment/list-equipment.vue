@@ -1,3 +1,5 @@
+<!-- eslint-disable arrow-parens -->
+<!-- eslint-disable sonarjs/no-extra-arguments -->
 <!-- eslint-disable semi -->
 <!-- samples.vue -->
 <script setup>
@@ -10,7 +12,7 @@ import { mostrarAlertaConfirmacion } from '@/utils/sweetalert-utils';
 import { useRouter } from 'vue-router';
 
 // Inicialización de los stores de procesos y catálogos
-const equipmentStore = useEquipmentStore();
+const processStore = useEquipmentStore();
 const dialogStore = useDialogStore();
 const catalogStore = useCatalogStore();
 const router = useRouter();
@@ -18,6 +20,7 @@ const router = useRouter();
 const isLoadingAnimation = ref(false);
 const isDialogVisible = ref(false);
 const dialogMode = ref('add');
+const userData = useCookie("userData").value;
 
 const closeDialog = () => {
   isDialogVisible.value = false;
@@ -34,8 +37,8 @@ const fetchData = async () => {
   isLoadingAnimation.value = true;
   try {
     await Promise.all([
-      catalogStore.getCatalogAllEquipment(), 
-      equipmentStore.loadInitialData(),
+      processStore.fetchAllEquipment(),
+      // processStore.loadInitialData(),
     ]);
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -53,7 +56,7 @@ const findTest = async id => {
 const handleEdit = item => {
   findTest(item.quality_test_group_id)
   dialogStore.currentProcess = item
-  dialogStore.openDialogWithActionId([1, 2, 3])
+  dialogStore.openDialogWithActionId([2, 3])
   isDialogVisible.value = true
 }
 
@@ -66,9 +69,14 @@ const handleReserveEquipment = () => {
 };
 
 const handleDelete = (item) => {
-  mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
-    equipmentStore.deleteProcess(item.id);
-  }, 'eliminar');
+  if (userData.role === 'admin' || userData.role === 'Manager-Control-Labs') {
+    mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
+      processStore.deleteProcess(item.id);
+    }, 'eliminar');
+  } else {
+    mostrarAlertaConfirmacion('No tienes permisos para eliminar este proceso', '¡Ups! 😅', () => {
+    }, 'error');
+  }
 };
 
 const handleView = (item) => {
@@ -85,11 +93,23 @@ const handleGoto = (item) => {
 
 const handleFinishProcess = (item) => {
   mostrarAlertaConfirmacion('¿Estás seguro de finalizar el proceso?', '¡Muy Bien 😎👍!', () => {
-    equipmentStore.endProcess(item.id);
+    processStore.endProcess(item.id);
   }, 'completar');
 };
 
+console.log('equipmentStore', processStore.tableConfig.data);
+
 onMounted(fetchData);
+
+// Define tus tooltips aquí
+const tooltips = {
+  finishProcess: 'Terminar Proceso',
+  edit: 'Muestras - Equipos - Reservas',
+  check: 'Marcar',
+  delete: 'Eliminar Proceso',
+  goTo: 'Ir a Equipos (En Proceso, Reservados y Finalizados)',
+  view: 'Visualizar PDF',
+};
 </script>
 
 <template>
@@ -97,18 +117,19 @@ onMounted(fetchData);
   <div class="d-flex justify-end">
     <VBtn @click="handleAddSample">
       <VIcon start icon="tabler-square-plus" size="large" />
-      AGREGAR NUEVO EQUIPO
+      INICIAR NUEVO PROCESO
     </VBtn>
   
   </div>
   <Dialog :is-dialog-visible="isDialogVisible" @update:isDialogVisible="closeDialog" />
   <div class="section-container">
     <div :class="{ 'loading-title-animate': isLoadingAnimation }" class="section-title">
-      CATALOGO DE EQUIPOS
+      PROCESOS ABIERTOS
     </div>
   </div>
   <TableView
-    :table-config="equipmentStore.tableConfig"
+    :table-config="processStore.tableConfig"
+    :tooltips="tooltips"
     @edit="handleEdit"
     @delete="handleDelete"
     @view="handleView"

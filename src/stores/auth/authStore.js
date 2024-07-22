@@ -29,9 +29,6 @@ export const useAuthStore = defineStore("auth", {
 
       try {
         const response = await apiLogin(enhancedCredentials);
-
-        console.log("Login response:", response); // Depuración
-
         const { status } = response.meta;
 
         if (status === 401) {
@@ -71,8 +68,6 @@ export const useAuthStore = defineStore("auth", {
 
       // Actualiza las habilidades en CASL
       ability.update(abilityRules);
-      console.log("User data set:", userData); // Depuración
-      console.log("Ability rules set:", abilityRules); // Depuración
     },
     clearAuthData() {
       useCookie("accessToken").value = null;
@@ -89,9 +84,6 @@ export const useAuthStore = defineStore("auth", {
     },
     async logout() {
       try {
-        // Puedes llamar a un endpoint API para invalidar el token si es necesario
-        // await apiLogout();
-
         // Limpia los datos de autenticación
         this.clearAuthData();
       } catch (error) {

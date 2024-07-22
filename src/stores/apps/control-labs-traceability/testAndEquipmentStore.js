@@ -139,8 +139,6 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
         email: userData.email,
       };
 
-      console.log("Transformed data:", transformedData);
-
       try {
         const { body } = await equipmentService.createEquipmentProcess({
           ...transformedData,

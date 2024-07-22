@@ -121,15 +121,6 @@ class ApiService {
       const { equipmentId, status, process_details, userCode, userId, email } =
         updatedata;
 
-      // const data = await $api.patch(fullPath, {
-      //   equipmentId,
-      //   status,
-
-      //   process_details,
-      //   userCode,
-      //   userId,
-      //   email,
-      // });
       const data = await $api.patch(fullPath, {
         updatedata,
       });

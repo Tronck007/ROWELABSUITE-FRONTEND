@@ -1,21 +1,18 @@
 <!-- eslint-disable semi -->
-<!-- eslint-disable vue/attribute-hyphenation -->
-<!-- eslint-disable import/no-unresolved -->
+<!-- samples.vue -->
 <script setup>
-import { useBatchStore, useCatalogStore, useDialogStore, useProcessStore } from '@/stores/apps/control-labs-traceability';
+import { useCatalogStore, useDialogStore, useEquipmentStore } from '@/stores/apps/control-labs-traceability';
 import Dialog from "@/views/apps/components/Dialog.vue";
 import Notifications from "@/views/apps/components/Notifications.vue";
 import TableView from '@/views/apps/control-labs-traceability/TableViews.vue';
-import { ref, onMounted, reactive, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { mostrarAlertaConfirmacion } from '@/utils/sweetalert-utils';
 import { useRouter } from 'vue-router';
-import BackButton from "@/views/apps/ui/BackButton.vue";
 
 // Inicialización de los stores de procesos y catálogos
-const batchHistoryStore = useBatchStore();
-const catalogStore = useCatalogStore();
+const equipmentStore = useEquipmentStore();
 const dialogStore = useDialogStore();
-const processStore = useProcessStore();
+const catalogStore = useCatalogStore();
 const router = useRouter();
 
 const isLoadingAnimation = ref(false);
@@ -37,8 +34,8 @@ const fetchData = async () => {
   isLoadingAnimation.value = true;
   try {
     await Promise.all([
-      catalogStore.getCatalogAllEquipment(),
-      batchHistoryStore.fetchAllBatchData(),
+      catalogStore.getCatalogAllEquipment(), 
+      equipmentStore.loadInitialData(),
     ]);
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -50,6 +47,7 @@ const fetchData = async () => {
 const findTest = async id => {
   await catalogStore.getCatalogTestById(id)
 }
+
 
 // Define tus funciones de manejo aquí
 const handleEdit = item => {
@@ -69,14 +67,12 @@ const handleReserveEquipment = () => {
 
 const handleDelete = (item) => {
   mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
-    processStore.deleteProcess(item.id); 
+    equipmentStore.deleteProcess(item.id);
   }, 'eliminar');
 };
 
 const handleView = (item) => {
   console.log('View:', item);
-  batchHistoryStore.currentProcess = item;
-  router.push({ name: 'lot-printing'});
 };
 
 const handleCheck = (item) => {
@@ -89,62 +85,41 @@ const handleGoto = (item) => {
 
 const handleFinishProcess = (item) => {
   mostrarAlertaConfirmacion('¿Estás seguro de finalizar el proceso?', '¡Muy Bien 😎👍!', () => {
-    processStore.endProcess(item.id);
+    equipmentStore.endProcess(item.id);
   }, 'completar');
 };
 
-// Configuración de headers
-const tableConfig  = reactive({
-  headers: {
-    main: computed(() => batchHistoryStore.headers),
-    sub: computed(() => batchHistoryStore.subHeaders),
-  },
-  filterCards: {
-    searchInput: true,
-    filterStatus: false,
-  },
-  filterSubtables: 'equipments',
-  expandedRows: true, 
-  buttonConfigs: {
-    main: {
-      showFinishButton: false,
-      showEdit: false,
-      showDelete: false,
-      showCheck: false,
-      showView: true,
-      showGoto: false,   
-    },
-    sub: {
-      showEdit: false,
-      showDelete: false,
-      showCheck: false,
-      showGoto: false,
-
-    },
-  },  
-  goToPage: 'samplesProcess',
-  isLoading: computed(() => batchHistoryStore.isLoading),
-  data: computed(() => batchHistoryStore.transformedData),
-})
-
 onMounted(fetchData);
+
+
+// Define tus tooltips aquí
 const tooltips = {
+  finishProcess: 'Terminar Proceso',
+  edit: 'Muestras - Equipos - Reservas',
+  check: 'Marcar',
+  delete: 'Eliminar Proceso',
+  goTo: 'Ir a Equipos (En Proceso, Reservados y Finalizados)',
   view: 'Visualizar PDF',
 };
 </script>
 
 <template>
   <Notifications />
-  <VCardText class="py-4 gap-4">
-    <BackButton />
-  </VCardText>
+  <div class="d-flex justify-end">
+    <VBtn @click="handleAddSample">
+      <VIcon start icon="tabler-square-plus" size="large" />
+      AGREGAR NUEVO EQUIPO
+    </VBtn>
+  
+  </div>
+  <Dialog :is-dialog-visible="isDialogVisible" @update:isDialogVisible="closeDialog" />
   <div class="section-container">
     <div :class="{ 'loading-title-animate': isLoadingAnimation }" class="section-title">
-      HISTORICO DE LOTES
+      CATALOGO DE EQUIPOS
     </div>
   </div>
   <TableView
-    :table-config="tableConfig"
+    :table-config="equipmentStore.tableConfig"
     :tooltips="tooltips"
     @edit="handleEdit"
     @delete="handleDelete"

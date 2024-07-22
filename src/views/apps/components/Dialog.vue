@@ -82,7 +82,7 @@ const filteredProps = computed(() => {
 <template>
   <VDialog
     :model-value="isDialogVisible"
-    max-width="900px"
+    max-width="800px"
     persistent
     @update:model-value="dialogVisibleUpdate"
   >

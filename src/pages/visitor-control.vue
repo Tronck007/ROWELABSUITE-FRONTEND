@@ -18,12 +18,6 @@ definePage({
   </div>
 </template>
 
-<script setup>
-const logout = () => {
-  // Aquí puedes agregar la lógica para cerrar sesión
-}
-</script>
-
 <style scoped>
 .min-h-screen {
   min-height: 100vh;

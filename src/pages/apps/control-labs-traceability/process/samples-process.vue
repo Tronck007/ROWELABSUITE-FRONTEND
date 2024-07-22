@@ -91,6 +91,16 @@ onMounted( async() => {
   await fetchData();
   setInterval(updateRemainingTimes, 60000); // 60000 ms = 1 minuto
 });
+
+const tooltips = {
+  finishProcess: 'Finalizar Equipo',
+  edit: 'Muestras - Equipos - Reservas',
+  check: 'Marcar',
+  delete: 'Eliminar Equipo',
+  goTo: 'Ir a Equipos (En Proceso, Reservados y Finalizados)',
+  view: 'Visualizar PDF',
+};
+
 </script>
 
 <template>
@@ -113,6 +123,7 @@ onMounted( async() => {
   </div>
   <TableView
     :table-config="testAndEquipmentStore.tableConfigProcess"
+    :tooltips="tooltips"
     @edit="handleEdit"
     @delete="handleDelete"
     @view="handleView"

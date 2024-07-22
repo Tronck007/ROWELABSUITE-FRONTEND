@@ -1,3 +1,5 @@
+<!-- eslint-disable arrow-parens -->
+<!-- eslint-disable sonarjs/no-extra-arguments -->
 <!-- eslint-disable semi -->
 <!-- samples.vue -->
 <script setup>
@@ -18,6 +20,7 @@ const router = useRouter();
 const isLoadingAnimation = ref(false);
 const isDialogVisible = ref(false);
 const dialogMode = ref('add');
+const userData = useCookie("userData").value;
 
 const closeDialog = () => {
   isDialogVisible.value = false;
@@ -53,7 +56,7 @@ const findTest = async id => {
 const handleEdit = item => {
   findTest(item.quality_test_group_id)
   dialogStore.currentProcess = item
-  dialogStore.openDialogWithActionId([1, 2, 3])
+  dialogStore.openDialogWithActionId([2, 3])
   isDialogVisible.value = true
 }
 
@@ -66,9 +69,14 @@ const handleReserveEquipment = () => {
 };
 
 const handleDelete = (item) => {
-  mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
-    processStore.deleteProcess(item.id);
-  }, 'eliminar');
+  if (userData.role === 'admin' || userData.role === 'Manager-Control-Labs') {
+    mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
+      processStore.deleteProcess(item.id);
+    }, 'eliminar');
+  } else {
+    mostrarAlertaConfirmacion('No tienes permisos para eliminar este proceso', '¡Ups! 😅', () => {
+    }, 'error');
+  }
 };
 
 const handleView = (item) => {
@@ -89,7 +97,19 @@ const handleFinishProcess = (item) => {
   }, 'completar');
 };
 
+console.log('equipmentStore', processStore.tableConfig.data);
+
 onMounted(fetchData);
+
+// Define tus tooltips aquí
+const tooltips = {
+  finishProcess: 'Terminar Proceso',
+  edit: 'Muestras - Equipos - Reservas',
+  check: 'Marcar',
+  delete: 'Eliminar Proceso',
+  goTo: 'Ir a Equipos (En Proceso, Reservados y Finalizados)',
+  view: 'Visualizar PDF',
+};
 </script>
 
 <template>
@@ -97,7 +117,7 @@ onMounted(fetchData);
   <div class="d-flex justify-end">
     <VBtn @click="handleAddSample">
       <VIcon start icon="tabler-square-plus" size="large" />
-      AGREGAR MUESTRAS
+      INICIAR NUEVO PROCESO
     </VBtn>
   
   </div>
@@ -109,6 +129,7 @@ onMounted(fetchData);
   </div>
   <TableView
     :table-config="processStore.tableConfig"
+    :tooltips="tooltips"
     @edit="handleEdit"
     @delete="handleDelete"
     @view="handleView"

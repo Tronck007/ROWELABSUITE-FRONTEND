@@ -1,3 +1,5 @@
+<!-- eslint-disable arrow-parens -->
+<!-- eslint-disable semi -->
 <!-- TableView.vue -->
 <script setup>
 import { ref, computed, defineProps, defineEmits } from "vue";
@@ -10,6 +12,10 @@ const props = defineProps({
   tableConfig: {
     type: Object,
     required: true,
+  },
+  tooltips: { // Propiedad para los tooltips
+    type: Object,
+    default: () => ({}),
   },
 });
 
@@ -44,6 +50,12 @@ const filteredData = computed(() => {
   }
 });
 
+// Función para obtener el estado real basado en las propiedades disponibles
+const getRealState = (item) => {
+  console.log('item', item.status || item.state || item.is_active);
+  return item.status || item.state || item.is_active;
+};
+
 const statusTextMap = {
   Created: "Creado",
   "In Process": "En Proceso",
@@ -59,7 +71,9 @@ const statusTextMap = {
 
 const estadosDisponibles = computed(() => {
   const uniqueStates = new Set(props.tableConfig.data.map((item) => item.state));
+
   return Array.from(uniqueStates).map((state) => statusTextMap[state] || "Estado Desconocido");
+  
 });
 
 const handleAction = (action, item) => {
@@ -98,15 +112,13 @@ const handleAction = (action, item) => {
       />
     </template>
 
-    <template #item.state="{ item }">  
+    <template #item.state="{ item }">
       <VChip
-        :color="resolveStatusVariant(item.status || item.state || item.is_active).color"
+        :color="resolveStatusVariant(getRealState(item)).color"
         size="small"
       >
-   
-       {{ resolveStatusVariant(item.status || item.state || item.is_active).text }}
+        {{ resolveStatusVariant(getRealState(item)).text }}
       </VChip>
-      {{item.is_active}}
     </template>
 
     <template #item.actions="{ item }">
@@ -119,6 +131,7 @@ const handleAction = (action, item) => {
         :show-view="props.tableConfig.buttonConfigs.main.showView"
         :disable-delete="expandedRows.includes(item.id)"
         :item="item"
+        :tooltips="props.tooltips"
         @edit="handleAction('edit', item)"
         @delete="handleAction('delete', item)"
         @check="handleAction('check', item)"

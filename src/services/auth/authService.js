@@ -1,3 +1,5 @@
+/* eslint-disable newline-before-return */
+/* eslint-disable semi */
 import { $api } from "@/utils/api";
 
 export async function apiLogin(credentials) {
@@ -9,7 +11,6 @@ export async function apiLogin(credentials) {
       },
     });
     return data;
-    // eslint-disable-next-line sonarjs/no-useless-catch
   } catch (error) {
     console.error("Login error:", error);
     throw error;
