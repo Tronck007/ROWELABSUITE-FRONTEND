@@ -20,6 +20,7 @@ const router = useRouter();
 const isLoadingAnimation = ref(false);
 const isDialogVisible = ref(false);
 const dialogMode = ref('add');
+const filterStatus = ref(["Creado", "En Proceso"]);
 const userData = useCookie("userData").value;
 
 const closeDialog = () => {
@@ -130,6 +131,7 @@ const tooltips = {
   <TableView
     :table-config="processStore.tableConfig"
     :tooltips="tooltips"
+    :filter-status="filterStatus"
     @edit="handleEdit"
     @delete="handleDelete"
     @view="handleView"

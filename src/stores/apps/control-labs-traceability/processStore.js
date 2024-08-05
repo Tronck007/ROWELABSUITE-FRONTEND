@@ -141,7 +141,7 @@ export const useProcessStore = defineStore("process", {
           (p) => p.id === id,
         ).process_code;
         const updatedData = {
-          state: "Completed",
+          state: "completed",
           userCode: userData.user_code,
           userId: userData.user_id,
           email: userData.email,

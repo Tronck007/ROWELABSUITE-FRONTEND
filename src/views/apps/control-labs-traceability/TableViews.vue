@@ -17,14 +17,18 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  filterStatus: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const emit = defineEmits(["edit", "delete", "view", "check", "goto", "finishProcess"]);
 
 const filterSubtables = props.tableConfig.filterSubtables;
 const filterCards = props.tableConfig.filterCards;
+const selectableStatus = ref(["Creado", "En Proceso"]);
 
-const selectableStatus = ref([]);
 const search = ref("");
 const expandedRows = ref([]);
 const actionClicked =  props.tableConfig.actionClicked;
@@ -40,10 +44,10 @@ const toggleRowExpansion = (item) => {
 };
 
 const filteredData = computed(() => {
-  if (selectableStatus.value.length === 0) {
+  if (props.filterStatus.length === 0) {
     return props.tableConfig.data;
   } else {
-    const selectedStates = selectableStatus.value.map((status) => {
+    const selectedStates = props.filterStatus.map((status) => {
       return Object.keys(statusTextMap).find((key) => statusTextMap[key] === status);
     }).filter((status) => status);
     return props.tableConfig.data.filter((item) => selectedStates.includes(item.state));
@@ -57,16 +61,13 @@ const getRealState = (item) => {
 };
 
 const statusTextMap = {
-  Created: "Creado",
-  "In Process": "En Proceso",
-  Revisado: "Revisado",
+  created: "Creado",
+  in_process: "En Proceso",
   completed: "Completado",
-  "On Hold": "En Espera",
-  Inactive: "Inactivo",
-  Rechazado: "Rechazado",
+  on_hold: "En Espera",
+  inactive: "Inactivo",
   reserved: "Reservado",
-  Aprobado: "Aprobado",
-  Activa: "Activa",
+  active: "Activo",	
 };
 
 const estadosDisponibles = computed(() => {
@@ -84,7 +85,7 @@ const handleAction = (action, item) => {
 <template>
   <FilterCard
     v-if="props.tableConfig.expandedRows"
-    v-model:modelValueSelectableStatus="selectableStatus"
+    v-model:modelValueSelectableStatus="props.filterStatus"
     v-model:modelValueSearch="search"
     :estado="estadosDisponibles"
     :filter-cards="props.tableConfig.filterCards || {}"

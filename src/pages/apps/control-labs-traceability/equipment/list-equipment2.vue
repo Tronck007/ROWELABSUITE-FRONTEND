@@ -17,7 +17,7 @@ const router = useRouter();
 
 const isLoadingAnimation = ref(false);
 const isDialogVisible = ref(false);
-const dialogMode = ref('add');
+
 
 const closeDialog = () => {
   isDialogVisible.value = false;
