@@ -115,10 +115,26 @@ const handleAction = (action, item) => {
 
     <template #item.state="{ item }">
       <VChip
-        :color="resolveStatusVariant(getRealState(item)).color"
+        :color="resolveStatusVariant(item.state).color"
         size="small"
       >
-        {{ resolveStatusVariant(getRealState(item)).text }}
+        {{ resolveStatusVariant(item.state).text }}
+      </VChip>
+    </template>
+    <template #item.status="{ item }">
+      <VChip
+        :color="resolveStatusVariant(item.status).color"
+        size="small"
+      >
+        {{ resolveStatusVariant(item.status).text }}
+      </VChip>
+    </template>
+    <template #item.is_active="{ item }">
+      <VChip
+        :color="resolveStatusVariant(item.is_active).color"
+        size="small"
+      >
+        {{ resolveStatusVariant(item.is_active).text }}
       </VChip>
     </template>
 

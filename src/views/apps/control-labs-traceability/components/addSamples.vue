@@ -65,7 +65,7 @@ const adjustSampleValue = () => {
     return
   }
 
-  const prefix = "MUES-"
+  const prefix = "MUES-A"
   let value = samples.value
 
   if (!value.startsWith(prefix)) {

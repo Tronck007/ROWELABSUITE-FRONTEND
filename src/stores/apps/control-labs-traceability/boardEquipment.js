@@ -24,6 +24,7 @@ export const useEquipmentStore = defineStore("equipment", {
       { title: "ESTADO", key: "is_active" },
       { title: "ACCIONES", key: "actions" },
     ],
+    currentIndexes: {},
   }),
   actions: {
     async fetchAllEquipmentStatus() {
@@ -37,7 +38,9 @@ export const useEquipmentStore = defineStore("equipment", {
           equipment_desc: item.equipment_desc,
           type_object: item.type_object,
           display_board: item.display_board,
-          imageUrl: `${IMAGE_BASE_URL}${item.imageUrl}`,
+          imageUrl: item.imageUrl
+            ? `${IMAGE_BASE_URL}${item.imageUrl}`
+            : placeholderImage,
           status: item.status,
           program_end_equipment_process:
             item.program_end_equipment_process || "00:00:00",
@@ -48,6 +51,7 @@ export const useEquipmentStore = defineStore("equipment", {
         this.isLoading = false;
       }
     },
+
     async fetchAllEquipment() {
       this.isLoading = true;
       try {
@@ -55,21 +59,24 @@ export const useEquipmentStore = defineStore("equipment", {
         this.originalData = data.map((item, index) => ({
           ...item,
           id: `${index}`,
+          imageUrl: item.imageUrl
+            ? `${IMAGE_BASE_URL}${item.imageUrl}`
+            : placeholderImage,
         }));
-
-        console.log("originalData", this.originalData);
       } catch (error) {
         console.error("Error fetching equipment:", error);
       } finally {
         this.isLoading = false;
       }
     },
+
     updateStatus(id, newStatus) {
       const equipment = this.originalData.find((eq) => eq.id === id);
       if (equipment) {
         equipment.status = newStatus;
       }
     },
+
     addEquipment(
       type_object,
       equipment_name,
@@ -85,18 +92,68 @@ export const useEquipmentStore = defineStore("equipment", {
         equipment_name,
         status,
         program_end_equipment_process: remaining,
-        imageUrl: `${IMAGE_BASE_URL}${imageUrl}`,
+        imageUrl: imageUrl ? `${IMAGE_BASE_URL}${imageUrl}` : placeholderImage,
         display_board,
       });
     },
-    async loadInitialData() {
-      this.isLoading = true;
+
+    initializeIndexes() {
+      for (const type in this.groupedEquipment) {
+        if (!this.currentIndexes[type]) {
+          this.currentIndexes[type] = 0;
+        }
+      }
+    },
+
+    rotateVisibleEquipmentCard() {
+      for (const type in this.currentIndexes) {
+        const group = this.groupedEquipment[type];
+        if (group && group.length > 4) {
+          this.currentIndexes[type] =
+            (this.currentIndexes[type] + 1) % group.length;
+        }
+      }
+    },
+
+    getVisibleEquipmentCard(equipmentGroup, equipmentType) {
       try {
-        await this.fetchAllEquipment();
+        if (!equipmentGroup) {
+          console.error(
+            `equipmentGroup is undefined or null for type: ${equipmentType}`,
+          );
+          return [];
+        }
+
+        if (typeof this.currentIndexes[equipmentType] === "undefined") {
+          this.currentIndexes[equipmentType] = 0;
+        }
+
+        const totalVisible = 4;
+        const visibleEquipment = [];
+
+        if (equipmentGroup.length < totalVisible) {
+          for (let i = 0; i < totalVisible; i++) {
+            if (i < equipmentGroup.length) {
+              visibleEquipment.push(equipmentGroup[i]);
+            } else {
+              visibleEquipment.push(null);
+            }
+          }
+        } else {
+          for (let i = 0; i < totalVisible; i++) {
+            const index =
+              (this.currentIndexes[equipmentType] + i) % equipmentGroup.length;
+            visibleEquipment.push(equipmentGroup[index]);
+          }
+        }
+
+        return visibleEquipment;
       } catch (error) {
-        console.log("Error loading initial data:", error);
-      } finally {
-        this.isLoading = false;
+        console.error(
+          `Error in getVisibleEquipmentCard for ${equipmentType}:`,
+          error,
+        );
+        return [];
       }
     },
   },
@@ -112,9 +169,11 @@ export const useEquipmentStore = defineStore("equipment", {
         return acc;
       }, {});
     },
+
     getEquipmentImage: () => (imageUrl) => {
       return imageUrl || placeholderImage;
     },
+
     getStatusImage: () => (status) => {
       switch (status) {
         case "free":
@@ -129,6 +188,7 @@ export const useEquipmentStore = defineStore("equipment", {
           return placeholderImage;
       }
     },
+
     getChipColor: () => (status) => {
       const colors = {
         free: "success",
@@ -138,6 +198,7 @@ export const useEquipmentStore = defineStore("equipment", {
       };
       return colors[status] || "";
     },
+
     equipmentTransformation: (state) => (equipmentData) => {
       return equipmentData.map((data) => ({
         id: data.id,
@@ -153,9 +214,11 @@ export const useEquipmentStore = defineStore("equipment", {
         ),
       }));
     },
+
     transformedData(state) {
       return state.equipmentTransformation(state.originalData);
     },
+
     tableConfig(state) {
       return {
         headers: {
@@ -166,7 +229,7 @@ export const useEquipmentStore = defineStore("equipment", {
           searchInput: true,
           filterStatus: false,
         },
-        expandedRows: false,
+        expandedRows: true,
         buttonConfigs: {
           main: {
             showFinishButton: false,

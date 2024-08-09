@@ -46,6 +46,10 @@ export const resolveStatusVariant = (status) => {
       return { color: colors.warning, text: "Revisado" };
     case "completed":
       return { color: colors.success, text: "Completado" };
+    case "free":
+      return { color: colors.success, text: "Libre" };
+    case true:
+      return { color: colors.success, text: "Activo" };
     case "On Hold":
       return { color: colors.warning, text: "En Espera" };
     case "Inactive":

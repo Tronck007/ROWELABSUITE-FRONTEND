@@ -130,7 +130,8 @@
         <div class="d-flex justify-end mt-4 mb-6">        
           <VBtn
             type="submit"
-            @click="handleSend"
+            :disabled="!isFormValid"
+            @click="handleSend"            
           >
             <VIcon
               start
@@ -207,6 +208,16 @@ const commentRule = (value) => {
   }
   return true
 };
+
+const isFormValid = computed(() => {
+  return (
+    equipment.value !== null &&
+    test.value !== null &&
+    (hora.value !== null || minutos.value !== null) &&
+    (isOtherSelected.value ? comment.value.trim() !== "" : true)
+  )
+})
+
 
 const handleSend = async () => {
   const processId = currentProcess.value.process_code

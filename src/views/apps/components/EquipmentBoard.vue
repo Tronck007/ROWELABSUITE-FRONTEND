@@ -90,8 +90,6 @@ const visibleGroupedEquipment = computed(() => {
     }
   })
 
-  console.log(visibleGroups)
-
   return visibleGroups
 })
 
@@ -139,14 +137,14 @@ const getColSize = computed(() => {
 }
 
 .status-icon {
-  width: 100%; /* Ajusta el ancho al 100% del contenedor */
-  max-width: 100px; /* Máximo ancho para pantallas grandes */
-  height: auto; /* Mantiene la proporción */
+  width: 100%;
+  max-width: 100px;
+  height: auto;
 }
 
 .responsive-image {
-  width: 100%; /* Ajusta el ancho al 100% del contenedor */
-  height: auto; /* Mantiene la proporción */
+  width: 100%;
+  height: auto;
 }
 
 .equipment-info {
