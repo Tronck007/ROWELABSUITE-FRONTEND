@@ -2,6 +2,24 @@
 <!-- eslint-disable camelcase -->
 <!-- eslint-disable sonarjs/no-extra-arguments -->
 <template>
+  <VRow align="end" justify="end" dense>
+    <VCol cols="6" md="6">
+      <VCheckbox
+        v-model="SameMethod"
+        label="Mismo sistema Cromatográfico"
+        @change="handleSameMethodChange"
+      />
+    </VCol>
+  </VRow>
+  <DynamicAlert
+    :show="showAlert"
+    title="Mismo sistema Cromatográfico activado"
+    :message="alertMessage"
+    type="warning"
+    @close="handleAlertClose"
+    @accept="handleAlertAccept"
+    @cancel="handleAlertCancel"
+  />
   <VRow align="center" justify="center" dense>
     <VCol cols="12" md="12">
       <AppTextField
@@ -38,20 +56,22 @@
 import { ref, computed } from 'vue'
 import { useDialogStore, useProcessStore } from "@/stores/apps/control-labs-traceability"
 import TableBasic from "../../components/TableBasic.vue"
+import DynamicAlert from "../../components/DynamicAlert.vue"
 
-// Instancia de los stores utilizados
 const processStore = useProcessStore()
 const dialogStore = useDialogStore()
 
-// Referencias computadas y reactivas
 const SubHeaders = computed(() => processStore.SubHeaders)
 const currentProcess = computed(() => dialogStore.currentProcess)
-const samples = ref("") // Almacenará la entrada de muestras
-const items = ref([]) // Almacena las muestras procesadas
-const colspan = ref(10) // Configuración de colspan para uso en la tabla
+const samples = ref("")
+const SameMethod = ref(false)
+const items = ref([])
+const colspan = ref(10)
 const isButtonDisabled = computed(() => items.value.length === 0)
+const showAlert = ref(false)
+const alertMessage = ref("")
+const checkboxName = "Mismo sistema Cromatográfico"
 
-// Configuración de los botones para la tabla
 const buttonConfigs = {
   showEdit: false,
   showDelete: true,
@@ -59,7 +79,29 @@ const buttonConfigs = {
   showGoto: false,
 }
 
-// Función para ajustar el valor de muestras a 15 caracteres
+const handleSameMethodChange = () => {
+  if (SameMethod.value) {
+    alertMessage.value = 'Se permitirá la adición de muestras de diferentes grupos de prueba de calidad.'
+    showAlert.value = true
+  } else {
+    alertMessage.value = ''
+    showAlert.value = false
+  }
+}
+
+const handleAlertClose = () => {
+  showAlert.value = false
+}
+
+const handleAlertAccept = () => {
+  showAlert.value = false
+}
+
+const handleAlertCancel = () => {
+  SameMethod.value = false
+  showAlert.value = false
+}
+
 const adjustSampleValue = () => {
   if (!samples.value) {
     return
@@ -75,65 +117,66 @@ const adjustSampleValue = () => {
   const inputPart = value.slice(prefix.length)
   const paddedPart = inputPart.padStart(15 - prefix.length, "0").slice(-10)
   samples.value = prefix + paddedPart
-};
+}
 
-// Función para agregar muestras y evitar duplicados
 const pressEnterSample = async () => {
-  adjustSampleValue() // Asegurarse de que el valor esté ajustado antes de enviar
+  adjustSampleValue()
 
   if (!samples.value) {
-    return // No hacer nada si el campo está en blanco
+    return
   }
 
   await processStore.fetchSamplesById(samples.value)
 
   const newSamples = Array.isArray(processStore.samples) ? processStore.samples : [processStore.samples]
   if (newSamples.length === 0) {
-    notify('addition', 'empty')
-    return;
+    return
   }
 
   const existingSample = items.value.length > 0 ? items.value[0] : undefined
-  if (!allHaveSameQualityTestId(newSamples, existingSample)) {
-    notify('addition', 'fail')
-    return;
+
+  if (SameMethod.value && !allHaveSameQualityTestId(newSamples, existingSample)) {
+    // Aquí puedes agregar cualquier lógica adicional para el mismo método
+  }
+
+  if (!SameMethod.value && !allHaveSameQualityTestId(newSamples, existingSample)) {
+    return
   }
 
   const uniqueSamples = newSamples.filter(isSampleUnique)
   if (uniqueSamples.length === 0) {
-    notify('addition', 'duplicate')
-    return;
+    return
   }
 
   items.value.push(...uniqueSamples)
   clearSamples()
-};
+}
 
-// Verificar si todas las muestras tienen el mismo quality_test_group_id
 const allHaveSameQualityTestId = (newSamples, existingSample) => {
   if (!existingSample) return true
   return newSamples.every(sample => sample.quality_test_group_id === existingSample.quality_test_group_id)
-};
+}
 
-// Verificar si la muestra es única
 const isSampleUnique = (sample) => !items.value.some(existingSample => existingSample.sampling_id === sample.sampling_id)
 
-// Función para limpiar el input de muestras
 const clearSamples = () => {
   samples.value = ""
-};
+}
 
-// Función para crear nuevo proceso
 const createProcess = async () => {
   if (items.value.length === 0) {
-    notify('creation', 'empty')
-    return;
+    return
   }
+
+  const qualityOrderNumber = SameMethod.value ? items.value.map(item => item.quality_order_number).join(',') : items.value[0].quality_order_number
+  const qualityTestGroupId = SameMethod.value ? items.value.map(item => item.quality_test_group_id).join(',') : items.value[0].quality_test_group_id
 
   const processData = {
     processData: {
-      quality_order_number: items.value[0].quality_order_number,
-      quality_test_group_id: items.value[0].quality_test_group_id,
+      quality_order_number: qualityOrderNumber,
+      quality_test_group_id: qualityTestGroupId,
+      same_method: SameMethod.value,
+      checkbox_name: checkboxName
     },
     sampleProcessesData: items.value.map(sample => ({
       sampling_id: sample.sampling_id,
@@ -151,11 +194,9 @@ const createProcess = async () => {
   }
 }
 
-// Función para agregar muestras al proceso existente
 const aggregateSamples = async () => {
   if (items.value.length === 0) {
-    notify('creation', 'empty')
-    return;
+    return
   }
 
   const processId = currentProcess.value.process_code
@@ -176,7 +217,6 @@ const aggregateSamples = async () => {
   }
 }
 
-// Función para manejar la acción de submit
 const handleSubmit = () => {
   if (dialogStore.openBySection === 'samples') {
     createProcess()
@@ -187,5 +227,10 @@ const handleSubmit = () => {
   }
 
   dialogStore.openBySection = null
-};
+}
+
+const handleNotificationCancel = () => {
+  SameMethod.value = false
+  showAlert.value = false
+}
 </script>
