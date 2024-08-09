@@ -1,3 +1,4 @@
+import ReportEquipment from "@/pages/apps/control-labs-traceability/reports/report-equipment.vue";
 import { defineAsyncComponent } from "vue";
 
 // Componentes dinámicos
@@ -30,6 +31,12 @@ export const dynamicComponents = {
     () =>
       import(
         "@/views/apps/control-labs-traceability/components/insLabSamples.vue"
+      ),
+  ),
+  ReportEquipment: defineAsyncComponent(
+    () =>
+      import(
+        "@/views/apps/control-labs-traceability/components/ReportEquipment.vue"
       ),
   ),
 };
@@ -66,6 +73,12 @@ export const dialogMeta = {
       subtitle: "Instrumentos",
       actionId: 5,
     },
+    {
+      icon: "tabler-calendar-event",
+      title: "Reportar",
+      subtitle: "Equipo",
+      actionId: 6,
+    },
   ],
   stepsConfig: [
     {
@@ -94,6 +107,11 @@ export const dialogMeta = {
       actionId: 5,
       title: "Uso de Instrumentos de Laboratorio",
       componentID: "ToolsLabs",
+    },
+    {
+      actionId: 6,
+      title: "Reportar Equipo",
+      componentID: "ReportEquipment",
     },
   ],
   componentMap: dynamicComponents, // Directamente usa el objeto de componentes dinámicos

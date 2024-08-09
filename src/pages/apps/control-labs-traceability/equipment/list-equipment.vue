@@ -56,7 +56,7 @@ const findTest = async id => {
 const handleEdit = item => {
   findTest(item.quality_test_group_id)
   dialogStore.currentProcess = item
-  dialogStore.openDialogWithActionId([2, 3])
+  dialogStore.openDialogWithActionId([6])
   isDialogVisible.value = true
 }
 
