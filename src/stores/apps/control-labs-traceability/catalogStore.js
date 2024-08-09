@@ -43,14 +43,36 @@ export const useCatalogStore = defineStore("catalog", {
       }
     },
 
-    async getCatalogTestById(id) {
-      console.log("id", id);
+    async getCatalogTestById(ids) {
+      console.log("ids", ids);
       try {
-        const { meta, data } = await catalogService.getTestCatalogById(id);
+        const idArray = ids.split(",");
 
-        const uniqueTests = data.reduce((acc, item) => {
-          acc[item.quality_test_id] = item;
+        // Fetch all tests for each ID
+        const allTests = await Promise.all(
+          idArray.map(async (id) => {
+            const { data } = await catalogService.getTestCatalogById(id.trim());
+            return data;
+          }),
+        );
 
+        // Find common tests if there are multiple IDs
+        let commonTests = allTests[0];
+        if (idArray.length > 1) {
+          commonTests = allTests.reduce((common, tests) => {
+            return common.filter((test) =>
+              tests.some(
+                (t) =>
+                  t.quality_test_id.trim().toLowerCase() ===
+                  test.quality_test_id.trim().toLowerCase(),
+              ),
+            );
+          });
+        }
+
+        // Process the unique tests
+        const uniqueTests = commonTests.reduce((acc, item) => {
+          acc[item.quality_test_id.trim().toLowerCase()] = item;
           return acc;
         }, {});
 

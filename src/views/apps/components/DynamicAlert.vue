@@ -31,10 +31,12 @@ const props = defineProps({
   show: Boolean,
   title: String,
   message: String,
+  
   type: {
     type: String,
     default: 'warning', // Puede ser 'info', 'success', 'warning', 'error'
   },
+
 })
 
 const emit = defineEmits(['close', 'accept', 'cancel'])

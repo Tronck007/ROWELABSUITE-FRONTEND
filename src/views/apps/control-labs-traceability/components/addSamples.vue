@@ -1,3 +1,4 @@
+<!-- eslint-disable camelcase -->
 <!-- eslint-disable sonarjs/no-identical-functions -->
 <!-- eslint-disable camelcase -->
 <!-- eslint-disable sonarjs/no-extra-arguments -->
@@ -13,9 +14,9 @@
   </VRow>
   <DynamicAlert
     :show="showAlert"
-    title="Mismo sistema Cromatográfico activado"
+    :title="alertTitle"
     :message="alertMessage"
-    type="warning"
+    :type="alertType"
     @close="handleAlertClose"
     @accept="handleAlertAccept"
     @cancel="handleAlertCancel"
@@ -52,6 +53,11 @@
   </VRow>
 </template>
 
+<!-- eslint-disable camelcase -->
+<!-- eslint-disable sonarjs/no-identical-functions -->
+<!-- eslint-disable camelcase -->
+<!-- eslint-disable sonarjs/no-extra-arguments -->
+
 <script setup>
 import { ref, computed } from 'vue'
 import { useDialogStore, useProcessStore } from "@/stores/apps/control-labs-traceability"
@@ -70,6 +76,8 @@ const colspan = ref(10)
 const isButtonDisabled = computed(() => items.value.length === 0)
 const showAlert = ref(false)
 const alertMessage = ref("")
+const alertTitle = ref("")
+const alertType = ref("")
 const checkboxName = "Mismo sistema Cromatográfico"
 
 const buttonConfigs = {
@@ -81,7 +89,9 @@ const buttonConfigs = {
 
 const handleSameMethodChange = () => {
   if (SameMethod.value) {
+    alertTitle.value="Mismo sistema Cromatográfico activado"
     alertMessage.value = 'Se permitirá la adición de muestras de diferentes grupos de prueba de calidad.'
+    alertType.value="Warning"
     showAlert.value = true
   } else {
     alertMessage.value = ''
@@ -175,7 +185,7 @@ const createProcess = async () => {
     processData: {
       quality_order_number: qualityOrderNumber,
       quality_test_group_id: qualityTestGroupId,
-      same_method: SameMethod.value,
+      same_system_chromatographic: SameMethod.value,
       checkbox_name: checkboxName
     },
     sampleProcessesData: items.value.map(sample => ({
