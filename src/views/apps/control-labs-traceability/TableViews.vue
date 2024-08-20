@@ -2,6 +2,7 @@
 <!-- eslint-disable semi -->
 <!-- TableView.vue -->
 <script setup>
+import { useDialogStore } from "@/stores/apps/control-labs-traceability/dialogStore";
 import { ref, computed, defineProps, defineEmits } from "vue";
 import { VDataTable } from "vuetify/labs/VDataTable";
 import FilterCard from "../components/FilterCard.vue";
@@ -23,11 +24,13 @@ const props = defineProps({
   },
 });
 
+
 const emit = defineEmits(["edit", "delete", "view", "check", "goto", "finishProcess"]);
 
 const filterSubtables = props.tableConfig.filterSubtables;
 const filterCards = props.tableConfig.filterCards;
 const selectableStatus = ref(["Creado", "En Proceso"]);
+const DialogStore = useDialogStore();
 
 const search = ref("");
 const expandedRows = ref([]);
@@ -54,11 +57,6 @@ const filteredData = computed(() => {
   }
 });
 
-// Función para obtener el estado real basado en las propiedades disponibles
-const getRealState = (item) => {
-  console.log('item', item.status || item.state || item.is_active);
-  return item.status || item.state || item.is_active;
-};
 
 const statusTextMap = {
   created: "Creado",
@@ -79,6 +77,7 @@ const estadosDisponibles = computed(() => {
 
 const handleAction = (action, item) => {
   emit(action, item);
+  DialogStore.currentProcessItem = ({ item, action });
 };
 </script>
 

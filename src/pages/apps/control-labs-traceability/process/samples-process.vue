@@ -1,7 +1,6 @@
-<!-- eslint-disable arrow-parens -->
-<!-- eslint-disable semi -->
+<!-- eslint-disable -->
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from "vue-router";
 import { useDialogStore, useTestAndEquipment, useReservationStore } from "@/stores/apps/control-labs-traceability";
 import Dialog from "@/views/apps/components/Dialog.vue";
@@ -15,19 +14,22 @@ const testAndEquipmentStore = useTestAndEquipment();
 const reservationStore = useReservationStore();
 const dialogStore = useDialogStore();
 const router = useRouter();
+const route = useRoute();
+
+// Variables reactivas para el manejo del estado
 const isLoadingAnimation = ref(false);
 const isDialogVisible = ref(false);
 const dialogMode = ref('add');
 
-const route = useRoute();
-
+// Función para cerrar el diálogo
 const closeDialog = () => {
   isDialogVisible.value = false;
 };
 
+// Función para abrir el diálogo en modo de edición o adición
 const openDialog = (mode, item = null) => {
   dialogMode.value = mode;
-  dialogStore.openDialogWithActionId(mode === 'edit' ? [2]: [2]);
+  dialogStore.openDialogWithActionId([2, 3, 4]);
   if (mode === 'edit' && item) {
     dialogStore.currentProcess = item;
   }
@@ -35,6 +37,12 @@ const openDialog = (mode, item = null) => {
   isDialogVisible.value = true;
 };
 
+// Función para manejar la edición de un elemento
+const handleEdit = item => {
+  openDialog('edit', item);
+};
+
+// Función para obtener los datos iniciales
 const fetchData = async () => {
   isLoadingAnimation.value = true;
   try {
@@ -46,34 +54,26 @@ const fetchData = async () => {
   }
 };
 
-const handleEdit = (item) => {
-  openDialog('edit', item);
-};
-
+// Función para manejar la eliminación de un proceso
 const handleDelete = (item) => {
   mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
     testAndEquipmentStore.deleteProcess(item);
   }, 'eliminar');
 };
 
+// Función para manejar la eliminación de una reserva
 const handleDeleteReservation = (item) => {
   mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
     reservationStore.deleteReservation(item);
   }, 'eliminar');
 };
 
-const handleView = (item) => {
-  console.log('View:', item);
-};
-
-const handleCheck = (item) => {
-  console.log('Check:', item);
-};
-
+// Función para navegar a otro proceso
 const handleGoto = (item) => {
   router.push({ name: 'samplesProcess', params: { id: item.process_code } });
 };
 
+// Función para finalizar un proceso
 const handleFinishProcess = (item) => {
   console.log('Finish:', item); 
   mostrarAlertaConfirmacion('¿Estás seguro de finalizar el proceso?', '¡Muy Bien 😎👍!', () => {
@@ -81,17 +81,18 @@ const handleFinishProcess = (item) => {
   }, 'completar');
 };
 
+// Función para actualizar los tiempos restantes
 const updateRemainingTimes = async () => {
   await fetchData();
 };
 
-
-
-onMounted( async() => {
+// Al montar el componente, se obtienen los datos y se establece un intervalo para actualizar los tiempos restantes cada minuto
+onMounted(async () => {
   await fetchData();
   setInterval(updateRemainingTimes, 60000); // 60000 ms = 1 minuto
 });
 
+// Tooltips para los botones de acción
 const tooltips = {
   finishProcess: 'Finalizar Equipo',
   edit: 'Muestras - Equipos - Reservas',
@@ -104,15 +105,21 @@ const tooltips = {
 </script>
 
 <template>
+  <!-- Componente de notificaciones -->
   <Notifications />
+
+  <!-- Botón de retroceso -->
   <VCardText class="py-4 gap-4">
     <BackButton />
   </VCardText>
+
+  <!-- Componente de diálogo -->
   <Dialog
     :is-dialog-visible="isDialogVisible"
     @update:isDialogVisible="closeDialog"
   />
   
+  <!-- Sección de Equipos en Proceso -->
   <div class="section-container section-process">
     <div
       :class="{ 'loading-title-animate': isLoadingAnimation }"
@@ -121,17 +128,17 @@ const tooltips = {
       EQUIPOS EN PROCESOS
     </div>
   </div>
+  
+  <!-- Tabla de equipos en proceso -->
   <TableView
     :table-config="testAndEquipmentStore.tableConfigProcess"
     :tooltips="tooltips"
-    @edit="handleEdit"
     @delete="handleDelete"
-    @view="handleView"
-    @check="handleCheck"
     @goto="handleGoto"
     @finishProcess="handleFinishProcess"
   />
 
+  <!-- Sección de Equipos Reservados -->
   <div class="section-container section-reserved">
     <div
       :class="{ 'loading-title-animate': isLoadingAnimation }"
@@ -141,16 +148,16 @@ const tooltips = {
     </div>
   </div>
 
+  <!-- Tabla de equipos reservados -->
   <TableView
     :table-config="testAndEquipmentStore.tableConfigReservation"
     @edit="handleEdit"
     @delete="handleDeleteReservation"
-    @view="handleView"
-    @check="handleCheck"
     @goto="handleGoto"
     @finishProcess="handleFinishProcess"
   />
 
+  <!-- Sección de Equipos Finalizados -->
   <div class="section-container section-finished">
     <div
       :class="{ 'loading-title-animate': isLoadingAnimation }"
@@ -160,12 +167,10 @@ const tooltips = {
     </div>
   </div>
   
+  <!-- Tabla de equipos finalizados -->
   <TableView
     :table-config="testAndEquipmentStore.tableConfigEndProcess"
-    @edit="handleEdit"
     @delete="handleDelete"
-    @view="handleView"
-    @check="handleCheck"
     @goto="handleGoto"
     @finishProcess="handleFinishProcess"
   />
@@ -237,4 +242,3 @@ const tooltips = {
   margin-bottom: 20px;
 }
 </style>
-

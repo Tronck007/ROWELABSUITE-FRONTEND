@@ -1,20 +1,20 @@
-/* eslint-disable semi */
-/* eslint-disable arrow-parens */
-/* eslint-disable camelcase */
+/* eslint-disable */
 import { equipmentService } from "@/services/apps/control-labs-traceability/EquipmentService";
 import { getDominicanRepublicDateTime } from "@/utils/actualDate";
 import { defineStore } from "pinia";
 import { useProcessStore } from "./";
-import { p } from "@antfu/utils";
 
+// Obtener los datos de usuario desde la cookie
 const userData = useCookie("userData").value;
 const processStore = useProcessStore();
 
+// Función para convertir una cadena de fecha y hora a formato ISO
 function convertDateTime(inputString) {
   const date = new Date(inputString);
   return date.toISOString();
 }
 
+// Función para formatear una cadena ISO a un formato legible
 function formatIsoDateTimeToReadable(dateTimeString) {
   const options = {
     day: "2-digit",
@@ -28,17 +28,18 @@ function formatIsoDateTimeToReadable(dateTimeString) {
   return new Date(dateTimeString).toLocaleString("es-ES", options);
 }
 
+// Función para calcular el tiempo restante en minutos
 const calculateRemainingTime = (endTime) => {
   const endDate = new Date(endTime);
-  const now = getDominicanRepublicDateTime(); // Asegúrate de obtener la fecha actual en cada llamada
+  const now = getDominicanRepublicDateTime();
   const difference = endDate.getTime() - now.getTime();
-  return Math.max(Math.floor(difference / 60000), 0); // Convertir a minutos y evitar valores negativos
+  return Math.max(Math.floor(difference / 60000), 0);
 };
 
-const user_code = userData.user_id; // Usamos el user_id del usuario
-
+// Definición de la tienda Pinia para manejar procesos y equipos
 export const useTestAndEquipment = defineStore("testAndEquipment", {
   state: () => ({
+    // Configuración de headers para diferentes vistas de la tabla
     headersEnd: [
       { title: "EQUIPO", key: "equipment_name" },
       { title: "DESCRIPCIÓN", key: "equipment_desc" },
@@ -91,17 +92,18 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
     dataTransformed: {},
   }),
   actions: {
+    // Acción para crear un nuevo proceso de prueba
     async createTestProcess(processId, equipmentInfo) {
-      const userData = useCookie("userData").value; // Asegúrate de obtener el valor actual del cookie aquí
+      const userData = useCookie("userData").value;
 
       const { test, hora, minutos, equipment, samples, comment } =
         equipmentInfo;
 
       const totalMinutos = hora * 60 + minutos;
-      const start = getDominicanRepublicDateTime(); // Usamos la fecha obtenida de getDominicanRepublicDateTime
+      const start = getDominicanRepublicDateTime();
       const end = new Date(start.getTime() + totalMinutos * 60000);
 
-      // Crear el objeto transformado
+      // Crear el objeto transformado para el proceso de prueba
       const transformedData = {
         processCode: processId,
         samples: samples.map((sample) => ({
@@ -158,20 +160,23 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
       }
     },
 
+    // Acción para obtener un proceso de prueba por su ID
     async getTestProcessById(id) {
       this.isLoading = true;
 
-      const process = await processStore.fetchProcessById(id);
+      try {
+        const process = await processStore.fetchProcessById(id);
+        this.originalData = process;
+      } catch (error) {
+        console.error("Error fetching process by ID:", error);
+      } finally {
+        this.isLoading = false;
+      }
 
-      this.originalData = process;
-
-      console.log("Original data:", this.originalData);
-
-      this.isLoading = false;
-
-      return process;
+      return this.originalData;
     },
 
+    // Acción para finalizar un proceso
     async endProcess(item) {
       const processCode = item.process_code;
 
@@ -191,7 +196,6 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
         );
 
         const { body } = response;
-
         const { meta } = body;
 
         if (meta.status === 200) {
@@ -205,8 +209,10 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
       }
     },
 
+    // Acción para eliminar un proceso
     async deleteProcess(item) {
       const processCode = item.process_code;
+
       try {
         const updatedData = {
           equipmentId: item.id_equipment,
@@ -232,10 +238,11 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
           notify("deletion", "fail");
         }
       } catch (error) {
-        console.error("Error ending process:", error);
+        console.error("Error deleting process:", error);
       }
     },
 
+    // Actualiza el tiempo restante en los procesos activos
     updateRemainingTimes() {
       const dataActive = this.transformedDataActive;
 
@@ -251,19 +258,21 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
   },
 
   getters: {
+    // Transforma los datos del equipo en un formato adecuado para la vista de procesos activos
     processTransformation: (state) => (processEquipment) => {
       const equipmentDateIds = {};
-      let idCounter = 0; // Contador global para asignar IDs únicos
+      let idCounter = 0;
+
       if (!processEquipment || !Array.isArray(processEquipment.samples)) {
         return [];
       }
 
       const transformed = processEquipment.samples.reduce((acc, sample) => {
         sample.equipments.forEach((equipmentRef) => {
-          const equipment = equipmentRef.equipment; // Acceder al equipo poblado
+          const equipment = equipmentRef.equipment;
 
           if (equipmentRef.equipment_process.status !== "in_process") {
-            return; // Omitimos los equipos que no están en proceso
+            return;
           }
 
           if (!equipment) {
@@ -273,13 +282,13 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
 
           const dateKey = `${equipment.equipment_name}-${new Date(equipmentRef.equipment_process.expected_start_time).toISOString().slice(0, 10)}`;
           if (!equipmentDateIds.hasOwnProperty(dateKey)) {
-            equipmentDateIds[dateKey] = ++idCounter; // Asignamos un ID incremental único si es la primera vez que vemos esta combinación de equipo y fecha
+            equipmentDateIds[dateKey] = ++idCounter;
           }
 
-          const key = `${equipment.equipment_name}-${dateKey}`; // Usamos el ID del equipo como clave para agrupar los tests
+          const key = `${equipment.equipment_name}-${dateKey}`;
           if (!acc[key]) {
             acc[key] = {
-              id: equipmentDateIds[dateKey], // Usamos el ID generado para esta combinación de equipo y fecha
+              id: equipmentDateIds[dateKey],
               id_equipment: equipmentRef.equipment_process.id_equipment,
               equipment_name: equipment.equipment_name,
               equipment_desc: equipment.equipment_desc,
@@ -293,7 +302,7 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
               program_end_equipment_process: formatIsoDateTimeToReadable(
                 equipmentRef.equipment_process.expected_end_time,
               ),
-              tests_in_process: [], // Iniciamos la lista de tests para este equipo
+              tests_in_process: [],
             };
           }
 
@@ -316,7 +325,7 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
                   calculateRemainingTime(
                     equipmentRef.equipment_process.expected_end_time,
                   ) + " minutos",
-                status: test.is_active ? "active" : "inactive", // Aquí podemos agregar más información de cada test si es necesario
+                status: test.is_active ? "active" : "inactive",
               });
             }
           });
@@ -328,19 +337,21 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
       return Object.values(transformed);
     },
 
+    // Transforma los datos del equipo en un formato adecuado para la vista de procesos completados
     processTransformationCompleted: (state) => (processEquipment) => {
       const equipmentDateIds = {};
-      let idCounter = 0; // Contador global para asignar IDs únicos
+      let idCounter = 0;
+
       if (!processEquipment || !Array.isArray(processEquipment.samples)) {
         return [];
       }
 
       const transformed = processEquipment.samples.reduce((acc, sample) => {
         sample.equipments.forEach((equipmentRef) => {
-          const equipment = equipmentRef.equipment; // Acceder al equipo poblado
+          const equipment = equipmentRef.equipment;
 
           if (equipmentRef.equipment_process.status !== "completed") {
-            return; // Omitimos los equipos que no están completados
+            return;
           }
 
           if (!equipment) {
@@ -350,13 +361,13 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
 
           const dateKey = `${equipment.equipment_name}-${new Date(equipmentRef.equipment_process.expected_start_time).toISOString().slice(0, 10)}`;
           if (!equipmentDateIds.hasOwnProperty(dateKey)) {
-            equipmentDateIds[dateKey] = ++idCounter; // Asignamos un ID incremental único si es la primera vez que vemos esta combinación de equipo y fecha
+            equipmentDateIds[dateKey] = ++idCounter;
           }
 
-          const key = `${equipment.equipment_name}-${dateKey}`; // Usamos el ID del equipo como clave para agrupar los tests
+          const key = `${equipment.equipment_name}-${dateKey}`;
           if (!acc[key]) {
             acc[key] = {
-              id: equipmentDateIds[dateKey], // Usamos el ID generado para esta combinación de equipo y fecha
+              id: equipmentDateIds[dateKey],
               id_equipment: equipmentRef.equipment_process.id_equipment,
               equipment_name: equipment.equipment_name,
               equipment_desc: equipment.equipment_desc,
@@ -373,7 +384,7 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
               real_end_equipment_process: formatIsoDateTimeToReadable(
                 equipmentRef.equipment_process.actual_end_time,
               ),
-              tests_in_process: [], // Iniciamos la lista de tests para este equipo
+              tests_in_process: [],
             };
           }
 
@@ -395,19 +406,22 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
                 real_end_equipment_process: formatIsoDateTimeToReadable(
                   equipmentRef.equipment_process.actual_end_time,
                 ),
-                status: test.is_active ? "active" : "inactive", // Aquí podemos agregar más información de cada test si es necesario
+                status: test.is_active ? "active" : "inactive",
               });
             }
           });
         });
+
         return acc;
       }, {});
 
       return Object.values(transformed);
     },
+
+    // Transforma los datos del equipo en un formato adecuado para la vista de reservas activas
     processTransformationReservations: (state) => (processEquipment) => {
       const equipmentDateIds = {};
-      let idCounter = 0; // Contador global para asignar IDs únicos
+      let idCounter = 0;
 
       if (!processEquipment || !Array.isArray(processEquipment.reservation)) {
         return [];
@@ -416,10 +430,10 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
       const transformed = processEquipment.reservation.reduce(
         (acc, reservation) => {
           if (reservation.status === "completed") {
-            return acc; // Omitir reservas con estado 'completed'
+            return acc;
           }
 
-          const equipment = reservation.equipment; // Acceder al equipo poblado
+          const equipment = reservation.equipment;
 
           if (!equipment) {
             console.error("Equipment is null or undefined", reservation);
@@ -428,13 +442,13 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
 
           const dateKey = `${equipment.equipment_name}-${new Date(reservation.expected_start_time).toISOString().slice(0, 10)}`;
           if (!equipmentDateIds.hasOwnProperty(dateKey)) {
-            equipmentDateIds[dateKey] = ++idCounter; // Asignamos un ID incremental único si es la primera vez que vemos esta combinación de equipo y fecha
+            equipmentDateIds[dateKey] = ++idCounter;
           }
 
-          const key = `${equipment.equipment_name}-${dateKey}`; // Usamos el ID del equipo como clave para agrupar las reservas
+          const key = `${equipment.equipment_name}-${dateKey}`;
           if (!acc[key]) {
             acc[key] = {
-              id: equipmentDateIds[dateKey], // Usamos el ID generado para esta combinación de equipo y fecha
+              id: equipmentDateIds[dateKey],
               equipment_name: equipment.equipment_name,
               equipment_desc: equipment.equipment_desc,
               process_code: processEquipment.process_code,
@@ -460,18 +474,22 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
       return Object.values(transformed);
     },
 
+    // Getter para obtener los datos transformados de los procesos activos
     transformedDataActive(state) {
       return this.processTransformation(state.originalData);
     },
 
+    // Getter para obtener los datos transformados de los procesos completados
     transformedDataComplete(state) {
       return this.processTransformationCompleted(state.originalData);
     },
 
+    // Getter para obtener los datos transformados de las reservas activas
     transformedDataReservations(state) {
       return this.processTransformationReservations(state.originalData);
     },
 
+    // Configuración de la tabla para los procesos activos
     tableConfigProcess(state) {
       return {
         headers: {
@@ -506,6 +524,7 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
       };
     },
 
+    // Configuración de la tabla para las reservas activas
     tableConfigReservation(state) {
       return {
         headers: {
@@ -539,6 +558,7 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
       };
     },
 
+    // Configuración de la tabla para los procesos finalizados
     tableConfigEndProcess(state) {
       return {
         headers: {

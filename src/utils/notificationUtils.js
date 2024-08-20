@@ -26,6 +26,10 @@ const messages = {
     loginFail: "No se pudo iniciar sesión. Revisa tu usuario y contraseña 🚫",
     logout: "Has cerrado sesión. ¡Esperamos verte pronto! 👋",
   },
+  findInfo: {
+    ok: "Información encontrada correctamente 🧐",
+    fail: "No se encontró información. Por favor, verifica los datos ingresados 🤔",
+  },
   addition: {
     duplicate: "El elemento ya existe y no se añadirá de nuevo 🚫🔁",
     fail: "Los nuevos Id de muestra no coinciden con grupo de pruebas existentes y no se agregaron 🔍❌",

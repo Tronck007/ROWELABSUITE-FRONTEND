@@ -1,5 +1,4 @@
-/* eslint-disable semi */
-/* eslint-disable camelcase */
+/* eslint-disable */
 import { defineStore } from "pinia";
 import { equipmentService } from "@/services/apps/control-labs-traceability/EquipmentService";
 import libreImage from "@images/status/Libre.png";

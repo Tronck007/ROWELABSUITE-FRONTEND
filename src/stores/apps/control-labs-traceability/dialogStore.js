@@ -1,23 +1,24 @@
+/* eslint-disable */
 import { defineStore } from "pinia";
 import { markRaw } from "vue";
 import { dialogMeta, dynamicComponents } from "@/utils/dialogConfigurations";
 
 export const useDialogStore = defineStore("dialog", {
   state: () => ({
-    currentProcess: null,
-    openBySection: null,
+    currentProcessItem: {},
     dialogVisible: false,
-    currentActionId: null,
     dialogConfig: null,
-    currentStep: { value: 0 },
+    currentStep: 0,
   }),
   actions: {
     openDialogWithActionId(actionIds) {
       this.dialogConfig = this.createDialogConfig(actionIds);
+      this.dialogVisible = true; // Asegura que el diálogo esté visible
     },
     closeDialog() {
       this.dialogVisible = false;
       this.dialogConfig = null;
+      this.currentStep = 0; // Reinicia el paso actual cuando se cierra el diálogo
     },
     createDialogConfig(actionIds) {
       const menuItems = [];

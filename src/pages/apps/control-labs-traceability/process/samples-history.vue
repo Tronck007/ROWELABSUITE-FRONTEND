@@ -1,38 +1,39 @@
-<!-- eslint-disable semi -->
-<!-- eslint-disable vue/attribute-hyphenation -->
-<!-- eslint-disable import/no-unresolved -->
+<!-- eslint-disable -->
 <script setup>
+import { ref, onMounted, reactive, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useBatchStore, useCatalogStore, useDialogStore, useProcessStore } from '@/stores/apps/control-labs-traceability';
 import Dialog from "@/views/apps/components/Dialog.vue";
 import Notifications from "@/views/apps/components/Notifications.vue";
 import TableView from '@/views/apps/control-labs-traceability/TableViews.vue';
-import { ref, onMounted, reactive, computed } from 'vue';
-import { mostrarAlertaConfirmacion } from '@/utils/sweetalert-utils';
-import { useRouter } from 'vue-router';
 import BackButton from "@/views/apps/ui/BackButton.vue";
+import { mostrarAlertaConfirmacion } from '@/utils/sweetalert-utils';
 
-// Inicialización de los stores de procesos y catálogos
+// Inicialización de los stores
 const batchHistoryStore = useBatchStore();
 const catalogStore = useCatalogStore();
 const dialogStore = useDialogStore();
 const processStore = useProcessStore();
 const router = useRouter();
 
+// Variables reactivas para manejar el estado del componente
 const isLoadingAnimation = ref(false);
 const isDialogVisible = ref(false);
 const dialogMode = ref('add');
 
+// Función para cerrar el diálogo
 const closeDialog = () => {
   isDialogVisible.value = false;
 };
 
 // Función para abrir el diálogo y configurar según la acción seleccionada
 const openDialog = () => {
-  dialogStore.openDialogWithActionId([1])
-  isDialogVisible.value = true
-  dialogStore.openBySection = 'samples'
-}
+  dialogStore.openDialogWithActionId([1]);
+  isDialogVisible.value = true;
+  dialogStore.openBySection = 'samples';
+};
 
+// Función para obtener datos iniciales
 const fetchData = async () => {
   isLoadingAnimation.value = true;
   try {
@@ -47,17 +48,18 @@ const fetchData = async () => {
   }
 };
 
+// Función para buscar una prueba por su ID
 const findTest = async id => {
-  await catalogStore.getCatalogTestById(id)
-}
+  await catalogStore.getCatalogTestById(id);
+};
 
-// Define tus funciones de manejo aquí
+// Funciones de manejo de eventos
 const handleEdit = item => {
-  findTest(item.quality_test_group_id)
-  dialogStore.currentProcess = item
-  dialogStore.openDialogWithActionId([1, 2, 3])
-  isDialogVisible.value = true
-}
+  findTest(item.quality_test_group_id);
+  dialogStore.currentProcess = item;
+  dialogStore.openDialogWithActionId([1, 2, 3]);
+  isDialogVisible.value = true;
+};
 
 const handleAddSample = () => {
   openDialog('add');
@@ -69,14 +71,14 @@ const handleReserveEquipment = () => {
 
 const handleDelete = (item) => {
   mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
-    processStore.deleteProcess(item.id); 
+    processStore.deleteProcess(item.id);
   }, 'eliminar');
 };
 
 const handleView = (item) => {
   console.log('View:', item);
   batchHistoryStore.currentProcess = item;
-  router.push({ name: 'lot-printing'});
+  router.push({ name: 'lot-printing' });
 };
 
 const handleCheck = (item) => {
@@ -93,7 +95,7 @@ const handleFinishProcess = (item) => {
   }, 'completar');
 };
 
-// Configuración de headers
+// Configuración de la tabla
 const tableConfig  = reactive({
   headers: {
     main: computed(() => batchHistoryStore.headers),
@@ -104,7 +106,7 @@ const tableConfig  = reactive({
     filterStatus: false,
   },
   filterSubtables: 'equipments',
-  expandedRows: true, 
+  expandedRows: true,
   buttonConfigs: {
     main: {
       showFinishButton: false,
@@ -112,22 +114,24 @@ const tableConfig  = reactive({
       showDelete: false,
       showCheck: false,
       showView: true,
-      showGoto: false,   
+      showGoto: false,
     },
     sub: {
       showEdit: false,
       showDelete: false,
       showCheck: false,
       showGoto: false,
-
     },
-  },  
+  },
   goToPage: 'samplesProcess',
   isLoading: computed(() => batchHistoryStore.isLoading),
   data: computed(() => batchHistoryStore.transformedData),
-})
+});
 
+// Ejecutar la función fetchData al montar el componente
 onMounted(fetchData);
+
+// Tooltips para los botones de acción
 const tooltips = {
   view: 'Visualizar PDF',
 };

@@ -1,8 +1,5 @@
-<!-- eslint-disable camelcase -->
-<!-- eslint-disable sonarjs/no-identical-functions -->
-<!-- eslint-disable camelcase -->
-<!-- eslint-disable sonarjs/no-extra-arguments -->
 <template>
+  <!-- Sección de la fila y columna para el checkbox -->
   <VRow align="end" justify="end" dense>
     <VCol cols="6" md="6">
       <VCheckbox
@@ -12,6 +9,8 @@
       />
     </VCol>
   </VRow>
+
+  <!-- Componente de alerta dinámica -->
   <DynamicAlert
     :show="showAlert"
     :title="alertTitle"
@@ -21,6 +20,8 @@
     @accept="handleAlertAccept"
     @cancel="handleAlertCancel"
   />
+
+  <!-- Campo de texto para la muestra con icono y eventos -->
   <VRow align="center" justify="center" dense>
     <VCol cols="12" md="12">
       <AppTextField
@@ -32,6 +33,8 @@
       />
     </VCol>
   </VRow>
+
+  <!-- Tabla para mostrar los elementos y botón de enviar -->
   <VRow align="center" justify="center" dense>
     <VCol cols="12" md="12">
       <TableBasic
@@ -53,20 +56,18 @@
   </VRow>
 </template>
 
-<!-- eslint-disable camelcase -->
-<!-- eslint-disable sonarjs/no-identical-functions -->
-<!-- eslint-disable camelcase -->
-<!-- eslint-disable sonarjs/no-extra-arguments -->
-
+<!-- eslint-disable -->
 <script setup>
 import { ref, computed } from 'vue'
 import { useDialogStore, useProcessStore } from "@/stores/apps/control-labs-traceability"
 import TableBasic from "../../components/TableBasic.vue"
 import DynamicAlert from "../../components/DynamicAlert.vue"
 
+// Instancia de las tiendas
 const processStore = useProcessStore()
 const dialogStore = useDialogStore()
 
+// Variables reactivas y computadas
 const SubHeaders = computed(() => processStore.SubHeaders)
 const currentProcess = computed(() => dialogStore.currentProcess)
 const samples = ref("")
@@ -80,6 +81,7 @@ const alertTitle = ref("")
 const alertType = ref("")
 const checkboxName = "Mismo sistema Cromatográfico"
 
+// Configuración de botones
 const buttonConfigs = {
   showEdit: false,
   showDelete: true,
@@ -87,11 +89,12 @@ const buttonConfigs = {
   showGoto: false,
 }
 
+// Manejo del cambio en el checkbox
 const handleSameMethodChange = () => {
   if (SameMethod.value) {
-    alertTitle.value="Mismo sistema Cromatográfico activado"
+    alertTitle.value = "Mismo sistema Cromatográfico activado"
     alertMessage.value = 'Se permitirá la adición de muestras de diferentes grupos de prueba de calidad.'
-    alertType.value="Warning"
+    alertType.value = "Warning"
     showAlert.value = true
   } else {
     alertMessage.value = ''
@@ -99,19 +102,23 @@ const handleSameMethodChange = () => {
   }
 }
 
+// Manejo de cierre de la alerta
 const handleAlertClose = () => {
   showAlert.value = false
 }
 
+// Manejo de aceptación de la alerta
 const handleAlertAccept = () => {
   showAlert.value = false
 }
 
+// Manejo de cancelación de la alerta
 const handleAlertCancel = () => {
   SameMethod.value = false
   showAlert.value = false
 }
 
+// Ajuste del valor de la muestra
 const adjustSampleValue = () => {
   if (!samples.value) {
     return
@@ -120,15 +127,18 @@ const adjustSampleValue = () => {
   const prefix = "MUES-A"
   let value = samples.value
 
+  // Agregar el prefijo si no está presente
   if (!value.startsWith(prefix)) {
     value = prefix + value
   }
 
+  // Ajustar el valor de la muestra
   const inputPart = value.slice(prefix.length)
   const paddedPart = inputPart.padStart(15 - prefix.length, "0").slice(-10)
   samples.value = prefix + paddedPart
 }
 
+// Manejo del evento Enter en el campo de muestra
 const pressEnterSample = async () => {
   adjustSampleValue()
 
@@ -146,7 +156,7 @@ const pressEnterSample = async () => {
   const existingSample = items.value.length > 0 ? items.value[0] : undefined
 
   if (SameMethod.value && !allHaveSameQualityTestId(newSamples, existingSample)) {
-    // Aquí puedes agregar cualquier lógica adicional para el mismo método
+    // Lógica adicional si el checkbox "Mismo sistema Cromatográfico" está activado
   }
 
   if (!SameMethod.value && !allHaveSameQualityTestId(newSamples, existingSample)) {
@@ -162,17 +172,21 @@ const pressEnterSample = async () => {
   clearSamples()
 }
 
+// Verifica si todas las muestras tienen el mismo ID de grupo de prueba de calidad
 const allHaveSameQualityTestId = (newSamples, existingSample) => {
   if (!existingSample) return true
   return newSamples.every(sample => sample.quality_test_group_id === existingSample.quality_test_group_id)
 }
 
+// Verifica si la muestra es única
 const isSampleUnique = (sample) => !items.value.some(existingSample => existingSample.sampling_id === sample.sampling_id)
 
+// Limpia el campo de muestras
 const clearSamples = () => {
   samples.value = ""
 }
 
+// Crea un nuevo proceso
 const createProcess = async () => {
   if (items.value.length === 0) {
     return
@@ -204,6 +218,7 @@ const createProcess = async () => {
   }
 }
 
+// Agrega las muestras al proceso
 const aggregateSamples = async () => {
   if (items.value.length === 0) {
     return
@@ -227,6 +242,7 @@ const aggregateSamples = async () => {
   }
 }
 
+// Manejo del evento de enviar
 const handleSubmit = () => {
   if (dialogStore.openBySection === 'samples') {
     createProcess()
@@ -239,6 +255,7 @@ const handleSubmit = () => {
   dialogStore.openBySection = null
 }
 
+// Manejo de cancelación de la notificación
 const handleNotificationCancel = () => {
   SameMethod.value = false
   showAlert.value = false

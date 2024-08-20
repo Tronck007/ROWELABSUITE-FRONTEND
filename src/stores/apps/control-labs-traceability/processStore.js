@@ -1,18 +1,19 @@
-/* eslint-disable semi */
-/* eslint-disable camelcase */
+/* eslint-disable */
 import { processService } from "@/services/apps/control-labs-traceability/ProcessService";
 import { formatIsoDateTimeToReadable } from "@/utils/dateUtils";
 import { defineStore } from "pinia";
 
+// Obtiene los datos del usuario desde una cookie
 const userData = useCookie("userData").value;
 
+// Define la tienda para el manejo de procesos
 export const useProcessStore = defineStore("process", {
   state: () => ({
-    processes: [],
-    samples: [],
-    currentProcess: null,
-    originalData: [],
-    isLoading: false,
+    processes: [], // Arreglo para almacenar los procesos
+    samples: [], // Arreglo para almacenar las muestras
+    currentProcess: null, // Proceso actual seleccionado
+    originalData: [], // Datos originales sin transformar
+    isLoading: false, // Indicador de carga
     headers: [
       { title: "# PROCESO", key: "process_code" },
       { title: "PQ", key: "quality_order_number" },
@@ -30,6 +31,7 @@ export const useProcessStore = defineStore("process", {
     ],
   }),
   actions: {
+    // Acción para obtener todos los procesos
     async fetchAllProcesses() {
       this.isLoading = true;
       try {
@@ -39,11 +41,13 @@ export const useProcessStore = defineStore("process", {
           id: `${index}`,
         }));
       } catch (error) {
-        console.log("Error fetching processes:", error);
+        console.error("Error fetching processes:", error);
       } finally {
         this.isLoading = false;
       }
     },
+
+    // Acción para obtener un proceso por su ID
     async fetchProcessById(id) {
       this.isLoading = true;
       try {
@@ -56,6 +60,8 @@ export const useProcessStore = defineStore("process", {
         this.isLoading = false;
       }
     },
+
+    // Acción para obtener muestras por su ID
     async fetchSamplesById(sampling_id) {
       try {
         const { meta, data } =
@@ -65,6 +71,8 @@ export const useProcessStore = defineStore("process", {
         console.error("Error fetching process by ID:", error);
       }
     },
+
+    // Acción para crear un nuevo proceso
     async createNewProcess(processData) {
       this.isLoading = true;
       try {
@@ -87,11 +95,11 @@ export const useProcessStore = defineStore("process", {
         this.isLoading = false;
       }
     },
+
+    // Acción para agregar muestras a un proceso existente
     async aggregateSamplesProcess(processId, samples) {
       this.isLoading = true;
-      const samplesData = samples.map((sample) => ({
-        ...sample,
-      }));
+      const samplesData = samples.map((sample) => ({ ...sample }));
       try {
         const { body } = await processService.aggregateSamples(processId, {
           user_code: userData.user_code,
@@ -106,10 +114,8 @@ export const useProcessStore = defineStore("process", {
               item.is_active = true;
             }
           });
-        } else {
-          if (data.is_active === undefined) {
-            data.is_active = true;
-          }
+        } else if (data.is_active === undefined) {
+          data.is_active = true;
         }
         if (meta.status === 201) {
           notify("creation", "ok");
@@ -135,6 +141,8 @@ export const useProcessStore = defineStore("process", {
         this.isLoading = false;
       }
     },
+
+    // Acción para finalizar un proceso
     async endProcess(id) {
       try {
         const processCode = this.originalData.find(
@@ -163,6 +171,8 @@ export const useProcessStore = defineStore("process", {
         console.error("Error ending process:", error);
       }
     },
+
+    // Acción para eliminar un proceso
     async deleteProcess(id) {
       try {
         const processCode = this.originalData.find(
@@ -191,6 +201,8 @@ export const useProcessStore = defineStore("process", {
         console.error("Error deleting process:", error);
       }
     },
+
+    // Acción para eliminar muestras de un proceso
     async deleteSamples(sampleProcessId) {
       this.isLoading = true;
       try {
@@ -201,18 +213,21 @@ export const useProcessStore = defineStore("process", {
         this.isLoading = false;
       }
     },
+
+    // Acción para cargar los datos iniciales
     async loadInitialData() {
       this.isLoading = true;
       try {
         await this.fetchAllProcesses();
       } catch (error) {
-        console.log("Error loading initial data:", error);
+        console.error("Error loading initial data:", error);
       } finally {
         this.isLoading = false;
       }
     },
   },
   getters: {
+    // Transformación de los datos de los procesos para su presentación
     processTransformation: (state) => (processData) => {
       return processData.map((data) => ({
         id: data.id,
@@ -229,9 +244,13 @@ export const useProcessStore = defineStore("process", {
         })),
       }));
     },
+
+    // Datos transformados para la tabla
     transformedData(state) {
       return this.processTransformation(state.originalData);
     },
+
+    // Configuración de la tabla
     tableConfig(state) {
       return {
         headers: {

@@ -1,39 +1,40 @@
-<!-- eslint-disable arrow-parens -->
-<!-- eslint-disable sonarjs/no-extra-arguments -->
-<!-- eslint-disable semi -->
+<!-- eslint-disable -->
 <!-- samples.vue -->
 <script setup>
+import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useCatalogStore, useDialogStore, useProcessStore } from '@/stores/apps/control-labs-traceability';
 import Dialog from "@/views/apps/components/Dialog.vue";
 import Notifications from "@/views/apps/components/Notifications.vue";
 import TableView from '@/views/apps/control-labs-traceability/TableViews.vue';
-import { ref, onMounted } from 'vue';
 import { mostrarAlertaConfirmacion } from '@/utils/sweetalert-utils';
-import { useRouter } from 'vue-router';
 
-// Inicialización de los stores de procesos y catálogos
+// Inicialización de los stores de procesos, diálogos y catálogos
 const processStore = useProcessStore();
 const dialogStore = useDialogStore();
 const catalogStore = useCatalogStore();
 const router = useRouter();
 
+// Variables reactivas para manejar el estado del componente
 const isLoadingAnimation = ref(false);
 const isDialogVisible = ref(false);
 const dialogMode = ref('add');
 const filterStatus = ref(["Creado", "En Proceso"]);
 const userData = useCookie("userData").value;
 
+// Función para cerrar el diálogo
 const closeDialog = () => {
   isDialogVisible.value = false;
 };
 
 // Función para abrir el diálogo y configurar según la acción seleccionada
 const openDialog = () => {
-  dialogStore.openDialogWithActionId([1])
-  isDialogVisible.value = true
-  dialogStore.openBySection = 'samples'
-}
+  dialogStore.openDialogWithActionId([1]);
+  isDialogVisible.value = true;
+  dialogStore.openBySection = 'samples';
+};
 
+// Función para obtener datos iniciales
 const fetchData = async () => {
   isLoadingAnimation.value = true;
   try {
@@ -48,61 +49,66 @@ const fetchData = async () => {
   }
 };
 
+// Función para encontrar una prueba por su ID
 const findTest = async id => {
-  await catalogStore.getCatalogTestById(id)
-}
+  await catalogStore.getCatalogTestById(id);
+};
 
-
-// Define tus funciones de manejo aquí
+// Función para manejar la edición de un proceso
 const handleEdit = item => {
-  findTest(item.quality_test_group_id)
-  dialogStore.currentProcess = item
-  dialogStore.openDialogWithActionId([2, 3])
-  isDialogVisible.value = true
-}
+  findTest(item.quality_test_group_id);
+  dialogStore.currentProcess = item;
+  dialogStore.openDialogWithActionId([2, 3, 4]);
+  isDialogVisible.value = true;
+};
 
+// Función para iniciar un nuevo proceso
 const handleAddSample = () => {
   openDialog('add');
 };
 
-const handleReserveEquipment = () => {
-  openDialog('reserve');
-};
-
+// Función para manejar la eliminación de un proceso
 const handleDelete = (item) => {
   if (userData.role === 'admin' || userData.role === 'Manager-Control-Labs') {
     mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
       processStore.deleteProcess(item.id);
     }, 'eliminar');
   } else {
-    mostrarAlertaConfirmacion('No tienes permisos para eliminar este proceso', '¡Ups! 😅', () => {
-    }, 'error');
+    mostrarAlertaConfirmacion('No tienes permisos para eliminar este proceso', '¡Ups! 😅', () => {}, 'error');
   }
 };
 
-const handleView = (item) => {
-  console.log('View:', item);
-};
-
-const handleCheck = (item) => {
-  console.log('Check:', item);
-};
-
+// Función para manejar la navegación a otro proceso
 const handleGoto = (item) => {
   router.push({ name: 'samplesProcess', params: { id: item.process_code } });
 };
 
+// Computed para verificar si hay algún equipo en proceso
+const isEquipmentInProcess = computed(() => {
+  return processStore.originalData.some(process =>
+    process.samples.some(sample =>
+      sample.equipments.some(equipment =>
+        equipment.equipment_process?.status === 'in_process'
+      )
+    )
+  );
+});
+
+// Función para manejar la finalización de un proceso, deshabilitada si hay equipos en proceso
 const handleFinishProcess = (item) => {
-  mostrarAlertaConfirmacion('¿Estás seguro de finalizar el proceso?', '¡Muy Bien 😎👍!', () => {
-    processStore.endProcess(item.id);
-  }, 'completar');
+  if (isEquipmentInProcess.value) {
+    mostrarAlertaConfirmacion('No puedes finalizar el proceso porque hay equipos en proceso', '¡Ups! 😅', () => {}, 'error');
+  } else {
+    mostrarAlertaConfirmacion('¿Estás seguro de finalizar el proceso?', '¡Muy Bien 😎👍!', () => {
+      processStore.endProcess(item.id);
+    }, 'completar');
+  }
 };
 
-console.log('equipmentStore', processStore.tableConfig.data);
-
+// Llamada a fetchData al montar el componente
 onMounted(fetchData);
 
-// Define tus tooltips aquí
+// Tooltips para los botones de acción
 const tooltips = {
   finishProcess: 'Terminar Proceso',
   edit: 'Muestras - Equipos - Reservas',
@@ -120,7 +126,6 @@ const tooltips = {
       <VIcon start icon="tabler-square-plus" size="large" />
       INICIAR NUEVO PROCESO
     </VBtn>
-  
   </div>
   <Dialog :is-dialog-visible="isDialogVisible" @update:isDialogVisible="closeDialog" />
   <div class="section-container">
@@ -133,9 +138,7 @@ const tooltips = {
     :tooltips="tooltips"
     :filter-status="filterStatus"
     @edit="handleEdit"
-    @delete="handleDelete"
-    @view="handleView"
-    @check="handleCheck"
+    @delete="handleDelete"    
     @goto="handleGoto"
     @finishProcess="handleFinishProcess"
   />

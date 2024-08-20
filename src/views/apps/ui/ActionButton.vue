@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/define-macros-order -->
 <!-- eslint-disable comma-dangle -->
 <!-- eslint-disable semi -->
 <!-- ActionButton.vue -->
@@ -34,6 +35,8 @@ const props = defineProps({
     })
   }
 });
+
+
 
 const emit = defineEmits(['edit', 'delete', 'check', 'goto', 'finishProcess', 'view']);
 

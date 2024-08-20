@@ -1,6 +1,4 @@
-/* eslint-disable camelcase */
-/* eslint-disable arrow-parens */
-/* eslint-disable semi */
+/* eslint-disable */
 import { defineStore } from "pinia";
 import { formatIsoDateTimeToReadable } from "@/utils/dateUtils";
 import { catalogService } from "@/services/apps/control-labs-traceability/CatalogService";
@@ -33,16 +31,15 @@ export const useBatchStore = defineStore("batch", {
     async fetchAllBatchData() {
       this.isLoading = true;
       try {
-        const { meta, data } = await catalogService.getAllBatchHistory();
+        const { data } = await catalogService.getAllBatchHistory();
 
+        // Mapear los datos recibidos para asignar un ID único a cada item
         this.originalData = data.map((item, index) => ({
           ...item,
           id: `${index}`,
         }));
-
-        console.log("Data:", this.originalData);
       } catch (error) {
-        console.log("Error fetching processes:", error);
+        console.error("Error fetching batch data:", error);
       } finally {
         this.isLoading = false;
       }

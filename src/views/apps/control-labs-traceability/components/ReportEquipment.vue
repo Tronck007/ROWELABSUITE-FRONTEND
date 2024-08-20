@@ -1,3 +1,4 @@
+<!-- eslint-disable -->
 <template>
   <VRow
     align="center"
@@ -140,6 +141,7 @@
   </VRow>
 </template>
 
+<!-- eslint-disable -->
 <script setup>
 import { ref } from 'vue';
 

@@ -47,6 +47,9 @@
       ],
       "@api-utils/*": [
         "./src/plugins/fake-api/utils/*"
+      ],
+      "@FakeData/*": [
+        "./src/FakeData/*"
       ]
     },
     "types": [

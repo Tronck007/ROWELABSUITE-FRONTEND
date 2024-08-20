@@ -1,16 +1,17 @@
-/* eslint-disable semi */
-/* eslint-disable camelcase */
+/* eslint-disable */
 import { reservationService } from "@/services/apps/control-labs-traceability/reservationService"; // Asegúrate de que la ruta de importación sea correcta
 import { getDominicanRepublicDateTime } from "@/utils/actualDate";
 import { defineStore } from "pinia";
 
+// Obtiene la fecha y hora actual de la República Dominicana
 const date = getDominicanRepublicDateTime();
 const userData = useCookie("userData").value;
 
+// Define la tienda para manejar las reservas
 export const useReservationStore = defineStore("reservation", {
   state: () => ({
-    reservations: [],
-    isLoading: false,
+    reservations: [], // Arreglo para almacenar las reservas
+    isLoading: false, // Indicador de carga
     headers: [
       { title: "EQUIPO", key: "object_name" },
       { title: "DESCRIPCIÓN", key: "object_name" },
@@ -22,11 +23,11 @@ export const useReservationStore = defineStore("reservation", {
     ],
   }),
   actions: {
+    // Acción para obtener todas las reservas
     async fetchAllReservations() {
       this.isLoading = true;
       try {
         const data = await reservationService.getAllProcesses();
-
         this.reservations = data;
       } catch (error) {
         console.error("Error fetching reservations:", error);
@@ -35,18 +36,18 @@ export const useReservationStore = defineStore("reservation", {
       }
     },
 
+    // Acción para crear una nueva reserva
     async createReservation(processCode, reservationData) {
-      // Asegúrate de obtener el valor actual del cookie aquí
       const { date, time, hora, minutos, equipment } = reservationData;
       const totalMinutos = hora * 60 + minutos;
 
-      // Aquí concatenamos date y time para formar una cadena en el formato deseado
+      // Combina la fecha y hora para formar una cadena en el formato deseado
       const dateTimeString = `${date} ${time}`;
-
-      const start = new Date(dateTimeString); // Esto ahora creará una fecha con la fecha y hora combinadas
+      const start = new Date(dateTimeString);
       const end = new Date(start.getTime() + totalMinutos * 60000);
       const { equipment_name, equipment_desc } = equipment;
 
+      // Construye el objeto de datos de la reserva
       const dataInfo = {
         processCode: processCode,
         reservationData: {
@@ -73,12 +74,13 @@ export const useReservationStore = defineStore("reservation", {
           notify("creation", "fail");
         }
       } catch (error) {
-        console.error("Error creating new process:", error);
+        console.error("Error creating new reservation:", error);
       } finally {
         this.isLoading = false;
       }
     },
 
+    // Acción para eliminar una reserva
     async deleteReservation(item) {
       const processCode = item.process_code;
       try {
@@ -105,7 +107,7 @@ export const useReservationStore = defineStore("reservation", {
           notify("deletion", "fail");
         }
       } catch (error) {
-        console.error("Error ending process:", error);
+        console.error("Error ending reservation:", error);
       }
     },
   },

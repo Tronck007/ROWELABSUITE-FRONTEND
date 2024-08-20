@@ -1,4 +1,4 @@
-import ReportEquipment from "@/pages/apps/control-labs-traceability/reports/report-equipment.vue";
+/* eslint-disable */
 import { defineAsyncComponent } from "vue";
 
 // Componentes dinámicos
@@ -39,8 +39,15 @@ export const dynamicComponents = {
         "@/views/apps/control-labs-traceability/components/ReportEquipment.vue"
       ),
   ),
+  ReagentsAndStandardsConsumption: defineAsyncComponent(
+    () =>
+      import(
+        "@/views/apps/control-labs-traceability/components/ReagentsAndStandardsConsumption.vue"
+      ),
+  ),
 };
 
+// Configuración del diálogo
 export const dialogMeta = {
   menuItems: [
     {
@@ -101,7 +108,7 @@ export const dialogMeta = {
     {
       actionId: 4,
       title: "Consumo de Reactivo & Estandar",
-      componentID: "InsLabSamples",
+      componentID: "ReagentsAndStandardsConsumption",
     },
     {
       actionId: 5,
@@ -114,5 +121,5 @@ export const dialogMeta = {
       componentID: "ReportEquipment",
     },
   ],
-  componentMap: dynamicComponents, // Directamente usa el objeto de componentes dinámicos
+  componentMap: dynamicComponents, // Uso directo del objeto de componentes dinámicos
 };
