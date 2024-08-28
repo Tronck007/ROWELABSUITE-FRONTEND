@@ -6,8 +6,9 @@ class ProcessService extends ApiService {
   constructor() {
     super("/control_lab_traceability");
   }
-  async getAllProcesses() {
-    return this.fetchAll(`process`);
+  async getAllProcesses(page = 1, limit = 10) {
+    const queryParams = new URLSearchParams({ page, limit });
+    return this.fetchAll(`process?${queryParams.toString()}`);
   }
 
   async getProcessById(id) {

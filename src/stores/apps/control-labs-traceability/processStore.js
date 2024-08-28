@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { processService } from "@/services/apps/control-labs-traceability/ProcessService";
 import { formatIsoDateTimeToReadable } from "@/utils/dateUtils";
+import WidgetCard from "@/views/apps/ui/WidgetCard.vue";
 import { defineStore } from "pinia";
 
 // Obtiene los datos del usuario desde una cookie
@@ -14,6 +15,10 @@ export const useProcessStore = defineStore("process", {
     currentProcess: null, // Proceso actual seleccionado
     originalData: [], // Datos originales sin transformar
     isLoading: false, // Indicador de carga
+    itemsPerPage: 10,
+    currentPage: 1,
+    catalogCurrentPage: 1,
+    totalDocuments: 0,
     headers: [
       { title: "# PROCESO", key: "process_code" },
       { title: "PQ", key: "quality_order_number" },
@@ -32,19 +37,39 @@ export const useProcessStore = defineStore("process", {
   }),
   actions: {
     // Acción para obtener todos los procesos
-    async fetchAllProcesses() {
+    async fetchAllProcesses(page = 1, itemsPerPage = 10) {
       this.isLoading = true;
+      this.error = null;
+
       try {
-        const { meta, data } = await processService.getAllProcesses();
+        const { data, meta } = await processService.getAllProcesses(
+          page,
+          itemsPerPage,
+        );
+
         this.originalData = data.map((item, index) => ({
           ...item,
-          id: `${index}`,
+          id: `${index + 1}`,
         }));
+
+        this.totalDocuments = meta.pagination.totalDocuments;
+        this.itemsPerPage = itemsPerPage;
       } catch (error) {
         console.error("Error fetching processes:", error);
+        this.error = "Error fetching processes";
       } finally {
         this.isLoading = false;
       }
+    },
+
+    // Función para establecer la página actual
+    setCurrentPage(newPage) {
+      this.currentPage = newPage;
+    },
+
+    // Función para establecer el número de elementos por página
+    setItemsPerPage(newItemsPerPage) {
+      this.itemsPerPage = newItemsPerPage;
     },
 
     // Acción para obtener un proceso por su ID
@@ -257,6 +282,7 @@ export const useProcessStore = defineStore("process", {
           main: state.headers,
           sub: state.subHeaders,
         },
+        WidgetCard: false,
         filterSubtables: "samples",
         filterCards: {
           searchInput: true,

@@ -36,8 +36,7 @@ const onUpdateSearch = (event) => {
 </script>
 
 <template>
-  <VCard class="mb-4">
-    <VCardText>
+
       <VRow>
         <VCol
           md="6"
@@ -75,6 +74,5 @@ const onUpdateSearch = (event) => {
           </div>
         </VCol>
       </VRow>
-    </VCardText>
-  </VCard>
+
 </template>

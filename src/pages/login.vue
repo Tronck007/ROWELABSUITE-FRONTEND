@@ -26,6 +26,7 @@ const isPasswordVisible = ref(false)
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const isLoading = ref(false)
 
 const errors = ref({
   userCode: undefined,
@@ -42,15 +43,18 @@ const credentials = ref({
 const rememberMe = ref(false)
 
 // Validador personalizado para campos requeridos
-const requiredValidator = (value) => !!value || 'Este campo es requerido'
+const requiredValidator = value => !!value || 'Este campo es requerido'
 
 const login = async () => {
+  isLoading.value = true
   try {
     await authStore.login(credentials.value)
     await router.replace(route.query.to ? String(route.query.to) : '/')
   } catch (err) {
     console.error('Login error:', err)
     errors.value.loginFailed = 'Error al iniciar sesión. Por favor verifica tus credenciales.'
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -129,9 +133,19 @@ const onSubmit = () => {
                   />
                 </div>
 
+                <div class="d-flex align-center justify-center mb-4">
+                  <VProgressCircular
+                    v-if="isLoading"
+                    :size="60"
+                    color="primary"
+                    indeterminate
+                  />
+                </div>
+
                 <VBtn
                   block
                   type="submit"
+                  :disabled="isLoading"
                 >
                   Login
                 </VBtn>

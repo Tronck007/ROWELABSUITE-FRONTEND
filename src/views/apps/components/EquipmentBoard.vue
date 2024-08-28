@@ -18,9 +18,8 @@
 
           <VDivider
             class="flex-grow-0 flex-shrink-0"
-            :vertical="display.mdAndUp"
+            :vertical="display.mdAndUp.value"
           />
-
           <div class="flex-grow-1">
             <h1>{{ type.toUpperCase() }}</h1>
             <VCardItem>
@@ -31,7 +30,10 @@
                   :sm="getColSize"
                   cols="12"
                 >
-                  <div v-if="equipment" class="equipment-item">
+                  <div
+                    v-if="equipment"
+                    class="equipment-item"
+                  >
                     <img
                       :src="getStatusImage(equipment.status)"
                       alt="status"
@@ -48,7 +50,10 @@
                       {{ equipment.program_end_equipment_process }}
                     </VChip>
                   </div>
-                  <div v-else class="equipment-item placeholder">
+                  <div
+                    v-else
+                    class="equipment-item placeholder"
+                  >
                     <VImg
                       :src="placeholderImage"
                       alt="placeholder"
@@ -124,6 +129,7 @@ const getVisibleEquipmentCard = (equipmentGroup, type) => {
 const getColSize = computed(() => {
   if (display.mdAndUp.value) return 3
   if (display.smAndUp.value) return 4
+  
   return 12
 })
 </script>

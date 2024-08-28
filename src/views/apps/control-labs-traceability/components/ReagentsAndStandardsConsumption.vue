@@ -120,7 +120,7 @@
           { label: 'Nombre', key: 'name' },
           { label: 'Unidad de Medida', key: 'unit' },
           { label: 'Fecha expiración', key: 'exp' },
-          { label: 'Número de vial', key: 'R144C0' },
+          { label: 'Número de vial', key: 'numberVials' },
         ]"
         @remove-item="removeItem"
       />
@@ -324,15 +324,14 @@ const removeItem = (index) => {
 
 // Cargar opciones de muestras al montar el componente
 onMounted(() => {
-  if (dialogStore.currentProcessItem.item.samples) {
-    sampleOptions.value = dialogStore.currentProcessItem.item.samples.map(sample => ({
+  if (dialogStore.currentProcessItem.samples) {
+    sampleOptions.value = dialogStore.currentProcess.samples.map(sample => ({
       text: `Muestra: ${sample.sampling_id} - Lote: ${sample.item_batch_id}`,
       value: sample.sampling_id,
     }));
 
     // Seleccionar todas las muestras por defecto
     selectedSamples.value = sampleOptions.value.map(sample => sample.value);
-    console.log('sampleOptions:', sampleOptions.value);
   }
 });
 </script>

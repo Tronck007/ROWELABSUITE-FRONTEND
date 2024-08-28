@@ -1,109 +1,4 @@
 <!-- eslint-disable -->
-<script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from "vue-router";
-import { useDialogStore, useTestAndEquipment, useReservationStore } from "@/stores/apps/control-labs-traceability";
-import Dialog from "@/views/apps/components/Dialog.vue";
-import Notifications from "@/views/apps/components/Notifications.vue";
-import TableView from '@/views/apps/control-labs-traceability/TableViews.vue';
-import BackButton from "@/views/apps/ui/BackButton.vue";
-import { mostrarAlertaConfirmacion } from '@/utils/sweetalert-utils';
-
-// Inicialización de los stores
-const testAndEquipmentStore = useTestAndEquipment();
-const reservationStore = useReservationStore();
-const dialogStore = useDialogStore();
-const router = useRouter();
-const route = useRoute();
-
-// Variables reactivas para el manejo del estado
-const isLoadingAnimation = ref(false);
-const isDialogVisible = ref(false);
-const dialogMode = ref('add');
-
-// Función para cerrar el diálogo
-const closeDialog = () => {
-  isDialogVisible.value = false;
-};
-
-// Función para abrir el diálogo en modo de edición o adición
-const openDialog = (mode, item = null) => {
-  dialogMode.value = mode;
-  dialogStore.openDialogWithActionId([2, 3, 4]);
-  if (mode === 'edit' && item) {
-    dialogStore.currentProcess = item;
-  }
-  dialogStore.openBySection = 'reservation';
-  isDialogVisible.value = true;
-};
-
-// Función para manejar la edición de un elemento
-const handleEdit = item => {
-  openDialog('edit', item);
-};
-
-// Función para obtener los datos iniciales
-const fetchData = async () => {
-  isLoadingAnimation.value = true;
-  try {
-    await testAndEquipmentStore.getTestProcessById(route.params.id);
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  } finally {
-    isLoadingAnimation.value = false;
-  }
-};
-
-// Función para manejar la eliminación de un proceso
-const handleDelete = (item) => {
-  mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
-    testAndEquipmentStore.deleteProcess(item);
-  }, 'eliminar');
-};
-
-// Función para manejar la eliminación de una reserva
-const handleDeleteReservation = (item) => {
-  mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
-    reservationStore.deleteReservation(item);
-  }, 'eliminar');
-};
-
-// Función para navegar a otro proceso
-const handleGoto = (item) => {
-  router.push({ name: 'samplesProcess', params: { id: item.process_code } });
-};
-
-// Función para finalizar un proceso
-const handleFinishProcess = (item) => {
-  console.log('Finish:', item); 
-  mostrarAlertaConfirmacion('¿Estás seguro de finalizar el proceso?', '¡Muy Bien 😎👍!', () => {
-    testAndEquipmentStore.endProcess(item);
-  }, 'completar');
-};
-
-// Función para actualizar los tiempos restantes
-const updateRemainingTimes = async () => {
-  await fetchData();
-};
-
-// Al montar el componente, se obtienen los datos y se establece un intervalo para actualizar los tiempos restantes cada minuto
-onMounted(async () => {
-  await fetchData();
-  setInterval(updateRemainingTimes, 60000); // 60000 ms = 1 minuto
-});
-
-// Tooltips para los botones de acción
-const tooltips = {
-  finishProcess: 'Finalizar Equipo',
-  edit: 'Muestras - Equipos - Reservas',
-  check: 'Marcar',
-  delete: 'Eliminar Equipo',
-  goTo: 'Ir a Equipos (En Proceso, Reservados y Finalizados)',
-  view: 'Visualizar PDF',
-};
-
-</script>
-
 <template>
   <!-- Componente de notificaciones -->
   <Notifications />
@@ -125,18 +20,39 @@ const tooltips = {
       :class="{ 'loading-title-animate': isLoadingAnimation }"
       class="section-title"
     >
-      EQUIPOS EN PROCESOS
+      EQUIPOS EN PROCESO
     </div>
   </div>
   
   <!-- Tabla de equipos en proceso -->
-  <TableView
+  <DataTable
     :table-config="testAndEquipmentStore.tableConfigProcess"
     :tooltips="tooltips"
+    @edit="handleEdit"
     @delete="handleDelete"
     @goto="handleGoto"
     @finishProcess="handleFinishProcess"
   />
+
+    <!-- Sección de Equipos Reservados -->
+  <div class="section-container section-consumables">
+    <div
+      :class="{ 'loading-title-animate': isLoadingAnimation }"
+      class="section-title"
+    >
+      ESTANDAR,REACTIVO E IMPUREZA CONSUMIDOS
+    </div>
+  </div>   
+  <!-- Tabla de equipos reservados -->
+  <DataTable
+    :table-config="testAndEquipmentStore.tableConfigReservation"
+    :tooltips="tooltips"
+    @edit="handleEdit"
+    @delete="handleDeleteReservation"
+    @goto="handleGoto"
+    @finishProcess="handleFinishProcess"
+  />
+
 
   <!-- Sección de Equipos Reservados -->
   <div class="section-container section-reserved">
@@ -149,8 +65,9 @@ const tooltips = {
   </div>
 
   <!-- Tabla de equipos reservados -->
-  <TableView
+  <DataTable
     :table-config="testAndEquipmentStore.tableConfigReservation"
+    :tooltips="tooltips"
     @edit="handleEdit"
     @delete="handleDeleteReservation"
     @goto="handleGoto"
@@ -168,13 +85,120 @@ const tooltips = {
   </div>
   
   <!-- Tabla de equipos finalizados -->
-  <TableView
+  <DataTable
     :table-config="testAndEquipmentStore.tableConfigEndProcess"
+    :tooltips="tooltips"
+    @edit="handleEdit"
     @delete="handleDelete"
     @goto="handleGoto"
     @finishProcess="handleFinishProcess"
   />
 </template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from "vue-router"
+import { useDialogStore, useTestAndEquipment, useReservationStore } from "@/stores/apps/control-labs-traceability"
+import Dialog from "@/views/apps/components/Dialog.vue"
+import Notifications from "@/views/apps/components/Notifications.vue"
+import DataTable from '@/views/apps/components/DataTable.vue' // Importa el DataTable
+import BackButton from "@/views/apps/ui/BackButton.vue"
+import { mostrarAlertaConfirmacion } from '@/utils/sweetalert-utils'
+
+// Inicialización de los stores
+const testAndEquipmentStore = useTestAndEquipment()
+const reservationStore = useReservationStore()
+const dialogStore = useDialogStore()
+const router = useRouter()
+const route = useRoute()
+
+// Variables reactivas para el manejo del estado
+const isLoadingAnimation = ref(false)
+const isDialogVisible = ref(false)
+const dialogMode = ref('add')
+
+// Función para cerrar el diálogo
+const closeDialog = () => {
+  isDialogVisible.value = false
+}
+
+// Función para abrir el diálogo en modo de edición o adición
+const openDialog = (mode, item = null) => {
+  dialogMode.value = mode
+  dialogStore.openDialogWithActionId([2, 3, 4])
+  if (mode === 'edit' && item) {
+    dialogStore.currentProcess = item
+  }
+  dialogStore.openBySection = 'reservation'
+  isDialogVisible.value = true
+}
+
+// Función para manejar la edición de un elemento
+const handleEdit = item => {
+  openDialog('edit', item)
+}
+
+// Función para obtener los datos iniciales
+const fetchData = async () => {
+  isLoadingAnimation.value = true
+  try {
+    await testAndEquipmentStore.getTestProcessById(route.params.id)
+  } catch (error) {
+    console.error('Error fetching data:', error)
+  } finally {
+    isLoadingAnimation.value = false
+  }
+}
+
+// Función para manejar la eliminación de un proceso
+const handleDelete = item => {
+  mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
+    testAndEquipmentStore.deleteProcess(item)
+  }, 'eliminar')
+}
+
+// Función para manejar la eliminación de una reserva
+const handleDeleteReservation = item => {
+  mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
+    reservationStore.deleteReservation(item)
+  }, 'eliminar')
+}
+
+// Función para navegar a otro proceso
+const handleGoto = item => {
+  router.push({ name: 'samplesProcess', params: { id: item.process_code } })
+}
+
+// Función para finalizar un proceso
+const handleFinishProcess = item => {
+  console.log('Finish:', item) 
+  mostrarAlertaConfirmacion('¿Estás seguro de finalizar el proceso?', '¡Muy Bien 😎👍!', () => {
+    testAndEquipmentStore.endProcess(item)
+  }, 'completar')
+}
+
+// Función para actualizar los tiempos restantes
+const updateRemainingTimes = async () => {
+  await fetchData()
+}
+
+// Al montar el componente, se obtienen los datos y se establece un intervalo para actualizar los tiempos restantes cada minuto
+onMounted(async () => {
+  await fetchData()
+  setInterval(updateRemainingTimes, 60000) // 60000 ms = 1 minuto
+})
+
+// Tooltips para los botones de acción
+const tooltips = {
+  finishProcess: 'Finalizar Equipo',
+  edit: 'Muestras - Equipos - Reservas',
+  check: 'Marcar',
+  delete: 'Eliminar Equipo',
+  goTo: 'Ir a Equipos (En Proceso, Reservados y Finalizados)',
+  view: 'Visualizar PDF',
+}
+
+</script>
 
 <style lang="scss" scoped>
 .section-container {
@@ -214,6 +238,16 @@ const tooltips = {
     to right,
     transparent,
     rgba(255, 165, 0, 90.5%),
+    transparent
+  );
+}
+
+.section-consumables .section-title::before,
+.section-consumables .section-title::after {
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    rgba(153, 102, 255, 0.905), /* Púrpura claro y vibrante */
     transparent
   );
 }

@@ -54,9 +54,11 @@ declare global {
   const eagerComputed: typeof import('@vueuse/core')['eagerComputed']
   const effectScope: typeof import('vue')['effectScope']
   const emailValidator: typeof import('./src/@core/utils/validators.js')['emailValidator']
+  const exportDataToExcel: typeof import('./src/utils/exportToExcel.js')['exportDataToExcel']
   const extendRef: typeof import('@vueuse/core')['extendRef']
   const formatDate: typeof import('./src/@core/utils/formatters.js')['formatDate']
   const formatDateToMonthShort: typeof import('./src/@core/utils/formatters.js')['formatDateToMonthShort']
+  const formatExcelDate: typeof import('./src/utils/exportToExcel.js')['formatExcelDate']
   const formatIsoDateTimeToReadable: typeof import('./src/utils/dateUtils.js')['formatIsoDateTimeToReadable']
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
@@ -416,9 +418,11 @@ declare module 'vue' {
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly emailValidator: UnwrapRef<typeof import('./src/@core/utils/validators.js')['emailValidator']>
+    readonly exportDataToExcel: UnwrapRef<typeof import('./src/utils/exportToExcel.js')['exportDataToExcel']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
     readonly formatDate: UnwrapRef<typeof import('./src/@core/utils/formatters.js')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./src/@core/utils/formatters.js')['formatDateToMonthShort']>
+    readonly formatExcelDate: UnwrapRef<typeof import('./src/utils/exportToExcel.js')['formatExcelDate']>
     readonly formatIsoDateTimeToReadable: UnwrapRef<typeof import('./src/utils/dateUtils.js')['formatIsoDateTimeToReadable']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
@@ -771,9 +775,11 @@ declare module '@vue/runtime-core' {
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly emailValidator: UnwrapRef<typeof import('./src/@core/utils/validators.js')['emailValidator']>
+    readonly exportDataToExcel: UnwrapRef<typeof import('./src/utils/exportToExcel.js')['exportDataToExcel']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
     readonly formatDate: UnwrapRef<typeof import('./src/@core/utils/formatters.js')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./src/@core/utils/formatters.js')['formatDateToMonthShort']>
+    readonly formatExcelDate: UnwrapRef<typeof import('./src/utils/exportToExcel.js')['formatExcelDate']>
     readonly formatIsoDateTimeToReadable: UnwrapRef<typeof import('./src/utils/dateUtils.js')['formatIsoDateTimeToReadable']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>

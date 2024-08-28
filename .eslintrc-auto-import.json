@@ -367,6 +367,8 @@
     "getDominicanRepublicDateTime": true,
     "getDominicanRepublicDateOnly": true,
     "defineAbilitiesFor": true,
-    "colors": true
+    "colors": true,
+    "exportDataToExcel": true,
+    "formatExcelDate": true
   }
 }

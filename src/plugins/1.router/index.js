@@ -24,14 +24,10 @@ const router = createRouter({
   },
 
   extendRoutes: (pages) => {
-    const extendedRoutes = [
+    return [
       ...redirects,
       ...[...pages, ...routes].map((route) => recursiveLayouts(route)),
     ];
-
-    console.log("Generated routes:", extendedRoutes); // Log the generated routes
-
-    return extendedRoutes;
   },
 });
 

@@ -14,9 +14,7 @@ class ApiService {
     try {
       const { data } = await $api.get(`${this.resourcePath}/${subPath}`);
 
-      const { body } = data;
-
-      return body;
+      return data;
     } catch (error) {
       throw error;
     }

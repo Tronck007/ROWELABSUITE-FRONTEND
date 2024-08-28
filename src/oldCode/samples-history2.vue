@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router';
 import { useBatchStore, useCatalogStore, useDialogStore, useProcessStore } from '@/stores/apps/control-labs-traceability';
 import Dialog from "@/views/apps/components/Dialog.vue";
 import Notifications from "@/views/apps/components/Notifications.vue";
-import DataTable from '@/views/apps/components/DataTable.vue' 
+import TableView from '@/views/apps/control-labs-traceability/TableViews.vue';
 import BackButton from "@/views/apps/ui/BackButton.vue";
 import { mostrarAlertaConfirmacion } from '@/utils/sweetalert-utils';
 
@@ -21,9 +21,6 @@ const router = useRouter();
 const isLoadingAnimation = ref(false);
 const isDialogVisible = ref(false);
 const dialogMode = ref('add');
-const totalItems = ref(processStore.totalDocuments)
-const itemsPerPage = ref(processStore.itemsPerPage)
-const page = ref(processStore.currentPage)
 
 // Función para cerrar el diálogo
 const closeDialog = () => {
@@ -37,12 +34,19 @@ const openDialog = () => {
   dialogStore.openBySection = 'samples';
 };
 
+const pagination = reactive({
+  page: computed(() => batchHistoryStore.currentPage),
+  itemsPerPage: 10,
+  totalItems: computed(() => batchHistoryStore.totalItems),
+});
+
 // Función para obtener datos iniciales
 const fetchData = async () => {
   isLoadingAnimation.value = true;
   try {
-    await Promise.all([      
-      batchHistoryStore.fetchAllBatchData(page.value, itemsPerPage.value),
+    await Promise.all([
+      catalogStore.getCatalogAllEquipment(),
+      batchHistoryStore.fetchAllBatchData(pagination.page, pagination.itemsPerPage),
     ]);
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -50,20 +54,6 @@ const fetchData = async () => {
     isLoadingAnimation.value = false;
   }
 };
-
-
-
-// Mapa de textos de estado
-const statusTextMap = {
-  created: "Creado",
-  in_process: "En Proceso",
-  completed: "Completado",
-  on_hold: "En Espera",
-  inactive: "Inactivo",
-  reserved: "Reservado",
-  active: "Activo",
-}
-
 
 // Función para buscar una prueba por su ID
 const findTest = async id => {
@@ -127,7 +117,6 @@ const tableConfig  = reactive({
     searchInput: true,
     filterStatus: false,
   },
-  WidgetCard:false,
   filterSubtables: 'equipments',
   expandedRows: true,
   buttonConfigs: {
@@ -152,22 +141,18 @@ const tableConfig  = reactive({
   data: computed(() => batchHistoryStore.transformedData),
 });
 
-// Cargar datos al montar el componente
-onMounted(() => {
-  fetchData()
-})
+const handlePageChange = (newPage) => {
+  pagination.page = newPage;
+  fetchData();
+};
 
-// Captura el cambio de página
-const handlePageUpdate = newPage => {
-  page.value = newPage
-  fetchData()
-}
+const handleItemsPerPageChange = (newItemsPerPage) => {
+  pagination.itemsPerPage = newItemsPerPage;
+  fetchData();
+};
 
-// Captura el cambio de elementos por página
-const handleItemsPerPageUpdate = newItemsPerPage => {
-  itemsPerPage.value = newItemsPerPage
-  fetchData()
-}
+// Ejecutar la función fetchData al montar el componente
+onMounted(fetchData);
 
 // Tooltips para los botones de acción
 const tooltips = {
@@ -186,12 +171,12 @@ const tooltips = {
       HISTORICO DE LOTES
     </div>
   </div>
-  <DataTable
+  <TableView
     :table-config="tableConfig"
     :tooltips="tooltips"
-    :total-items="totalItems"
-    :items-per-page="itemsPerPage"
-    :page="page"
+    :total-items="pagination.totalItems"
+    :items-per-page="pagination.itemsPerPage"
+    :current-page="pagination.page"
     @edit="handleEdit"
     @delete="handleDelete"
     @view="handleView"
@@ -199,8 +184,8 @@ const tooltips = {
     @goto="handleGoto"
     @finishProcess="handleFinishProcess"
     @print="handleExportLineToExcel"
-    @update:page="handlePageUpdate" 
-    @update:itemsPerPage="handleItemsPerPageUpdate"
+    @page-change="handlePageChange"
+    @items-per-page-change="handleItemsPerPageChange"
   />
 </template>
 

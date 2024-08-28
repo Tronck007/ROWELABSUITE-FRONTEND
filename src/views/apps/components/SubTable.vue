@@ -1,7 +1,5 @@
-<!-- eslint-disable camelcase -->
-<!-- eslint-disable vue/no-unused-vars -->
-<!-- eslint-disable vue/no-lone-template -->
-<!-- eslint-disable vue/prop-name-casing -->
+<!-- eslint-disable -->
+
 <script setup>
 import { mostrarAlertaConfirmacion, mostrarAlertaExito } from '@/utils/sweetalert-utils';
 import { VDataTable } from "vuetify/labs/VDataTable";
@@ -16,9 +14,6 @@ const { items, colspan, subHeaders, buttonConfigs, loading } = defineProps({
   loading: Boolean, 
 })
 
-console.log('SubTable items:', items)
-
-
 const resolveStatusVariant = is_active => {
   if (is_active) {
     
@@ -28,9 +23,9 @@ const resolveStatusVariant = is_active => {
   }
 }
 
+//TODO: Implementar la función handleDelete
 const handleDelete = item => {
   mostrarAlertaConfirmacion('¿Estás seguro?', '¡No podrás revertir esto!', () => {
-    console.log('Delete clicked for Samples:', item)
     mostrarAlertaExito('El elemento ha sido eliminado.')
   })
 }

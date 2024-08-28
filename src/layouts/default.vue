@@ -7,9 +7,6 @@ const DefaultLayoutWithHorizontalNav = defineAsyncComponent(() => import('./comp
 const DefaultLayoutWithVerticalNav = defineAsyncComponent(() => import('./components/DefaultLayoutWithVerticalNav.vue'))
 const configStore = useConfigStore()
 
-
-console.log('configStore', configStore.theme)
-
 // ℹ️ This will switch to vertical nav when define breakpoint is reached when in horizontal nav layout
 
 // Remove below composable usage if you are not using horizontal nav layout in your app

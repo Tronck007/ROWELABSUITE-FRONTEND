@@ -1,6 +1,4 @@
-<!-- eslint-disable vue/define-macros-order -->
-<!-- eslint-disable comma-dangle -->
-<!-- eslint-disable semi -->
+<!-- eslint-disable -->
 <!-- ActionButton.vue -->
 <script setup>
 import { defineProps, defineEmits } from 'vue';
@@ -12,6 +10,10 @@ const props = defineProps({
   showView: Boolean,
   showGoToButton: Boolean,
   showFinishButton: {
+    type: Boolean,
+    default: false,
+  },
+  showPrintButton: { // Nueva propiedad para el botón de imprimir
     type: Boolean,
     default: false,
   },
@@ -31,14 +33,13 @@ const props = defineProps({
       check: 'Marcar',
       delete: 'Eliminar',
       goTo: 'Ir a Página',
-      view: 'Visualizar PDF'
+      view: 'Visualizar PDF',
+      print: 'Imprimir' // Tooltip para el botón de imprimir
     })
   }
 });
 
-
-
-const emit = defineEmits(['edit', 'delete', 'check', 'goto', 'finishProcess', 'view']);
+const emit = defineEmits(['edit', 'delete', 'check', 'goto', 'finishProcess', 'view', 'print']); // Emitir evento 'print'
 
 const handleEdit = () => emit('edit', props.item);
 const handleDelete = () => emit('delete', props.item);
@@ -46,6 +47,7 @@ const handleCheck = () => emit('check', props.item);
 const handleGoTo = () => emit('goto', props.item);
 const handleFinishProcess = () => emit('finishProcess', props.item);
 const handleView = () => emit('view', props.item);
+const handlePrint = () => emit('print', props.item); // Manejar el clic en el botón de imprimir
 </script>
 
 <template>
@@ -130,6 +132,21 @@ const handleView = () => emit('view', props.item);
       </template>
       <span>{{ tooltips.view }}</span>
     </VTooltip>
+
+    <!-- Nuevo botón de imprimir -->
+    <template v-if="showPrintButton">
+      <VTooltip location="top" :props="props">
+        <template #activator="{ props }">
+          <IconBtn @click.stop="handlePrint" v-bind="props">
+            <VIcon
+              icon="tabler-printer"
+              style="color: #00abfb"
+            />
+          </IconBtn>
+        </template>
+        <span>{{ tooltips.print }}</span>
+      </VTooltip>
+    </template>
   </div>
 </template>
 

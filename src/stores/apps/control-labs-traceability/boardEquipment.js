@@ -8,12 +8,31 @@ import noAnilibleImage from "@images/status/NoDisponible.png";
 import placeholderImage from "@images/status/placeholder.png";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
-const userData = useCookie("userData").value;
+
+// Función para calcular el tiempo restante en minutos
+const calculateRemainingTime = (endTime) => {
+  const endDate = new Date(endTime);
+  const now = getDominicanRepublicDateTime();
+  const difference = endDate.getTime() - now.getTime();
+  return Math.max(Math.floor(difference / 60000), 0);
+};
 
 export const useEquipmentStore = defineStore("equipment", {
   state: () => ({
     originalData: [],
+    catalogEquipment: [], // Añadido para almacenar el catálogo de equipos
     isLoading: false,
+    error: null,
+    itemsPerPage: 10,
+    currentPage: 1,
+    catalogCurrentPage: 1,
+    totalDocuments: 0,
+    free: 0,
+    reserved: 0,
+    in_process: 0,
+    fault: 0,
+    combined: [],
+
     headers: [
       { title: "EQUIPO", key: "equipment_name" },
       { title: "DESCRIPCIÓN", key: "equipment_desc" },
@@ -26,49 +45,106 @@ export const useEquipmentStore = defineStore("equipment", {
     currentIndexes: {},
   }),
   actions: {
-    async fetchAllEquipmentStatus() {
+    // Acción para obtener el estado de todos los equipos
+    async fetchAllEquipmentStatus(page, itemsPerPage) {
       this.isLoading = true;
+      this.error = null;
       try {
-        const { data } = await equipmentService.getAllEquipmentStatus();
-        this.originalData = data.map((item, index) => ({
-          id: index + 1,
-          _id: item._id,
-          equipment_name: item.equipment_name,
-          equipment_desc: item.equipment_desc,
-          type_object: item.type_object,
-          display_board: item.display_board,
-          imageUrl: item.imageUrl
-            ? `${IMAGE_BASE_URL}${item.imageUrl}`
-            : placeholderImage,
-          status: item.status,
-          program_end_equipment_process:
-            item.program_end_equipment_process || "00:00:00",
-        }));
+        const { data, meta } = await equipmentService.getAllEquipment(1, 158);
+
+        this.originalData = data.map((item, index) => {
+          const programEndTime =
+            item.program_end_equipment_process || "00:00:00";
+
+          // Calcula el tiempo restante en minutos
+          const remainingMinutes = calculateRemainingTime(programEndTime);
+
+          return {
+            id: index + 1,
+            _id: item._id,
+            equipment_name: item.equipment_name,
+            equipment_desc: item.equipment_desc,
+            type_object: item.type_object,
+            display_board: item.display_board,
+            imageUrl: item.imageUrl
+              ? `${IMAGE_BASE_URL}${item.imageUrl}`
+              : placeholderImage,
+            status: item.status,
+            program_end_equipment_process:
+              remainingMinutes > 0 ? `${remainingMinutes} min` : "Finalizado",
+          };
+        });
+
+        console.log("this.originalData", this.originalData);
       } catch (error) {
         console.error("Error fetching equipment:", error);
+        this.error = "Error fetching equipment";
       } finally {
         this.isLoading = false;
       }
     },
 
-    async fetchAllEquipment() {
+    async fetchAllEquipment(page, itemsPerPage) {
       this.isLoading = true;
+      this.error = null;
+
       try {
-        const { data } = await equipmentService.getAllEquipment();
+        const { data, meta } = await equipmentService.getAllEquipment(
+          page,
+          itemsPerPage,
+        );
+
         this.originalData = data.map((item, index) => ({
           ...item,
-          id: `${index}`,
+          id: `${index + 1}`,
           imageUrl: item.imageUrl
             ? `${IMAGE_BASE_URL}${item.imageUrl}`
             : placeholderImage,
         }));
+        this.totalDocuments = meta.totalDocuments;
+        this.itemsPerPage = itemsPerPage;
+        this.free = meta.totalsByStatus.free;
+        this.reserved = meta.totalsByStatus.reserved;
+        this.in_process = meta.totalsByStatus.in_process;
+        this.fault = meta.totalsByStatus.fault;
       } catch (error) {
-        console.error("Error fetching equipment:", error);
+        console.error("Error fetching equipment data:", error);
+        this.error = "Error fetching equipment data";
       } finally {
         this.isLoading = false;
       }
     },
 
+    setCurrentPage(newPage) {
+      this.currentPage = newPage;
+    },
+
+    setItemsPerPage(newItemsPerPage) {
+      this.itemsPerPage = newItemsPerPage;
+    },
+
+    // Acción para obtener el catálogo de equipos con paginación separada
+    async fetchCatalogAllEquipment() {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        const { data, meta } = await equipmentService.getAllEquipmentCatalog();
+
+        this.combined = data.map((item) => ({
+          equipment_name: item.object_id,
+          equipment_desc: item.object_desc,
+          type_object: item.object_type_id,
+          combined_field: `${item.object_id} - ${item.object_desc}`,
+        }));
+      } catch (error) {
+        console.error("Error fetching catalog equipment:", error);
+        this.error = "Error fetching catalog equipment";
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    // Otras acciones (updateStatus, addEquipment, etc.) se mantienen igual
     updateStatus(id, newStatus) {
       const equipment = this.originalData.find((eq) => eq.id === id);
       if (equipment) {
@@ -156,6 +232,7 @@ export const useEquipmentStore = defineStore("equipment", {
       }
     },
   },
+
   getters: {
     groupedEquipment: (state) => {
       return state.originalData.reduce((acc, equipment) => {
@@ -223,6 +300,7 @@ export const useEquipmentStore = defineStore("equipment", {
         headers: {
           main: state.headers,
         },
+        WidgetCard: true,
         filterSubtables: "",
         filterCards: {
           searchInput: true,

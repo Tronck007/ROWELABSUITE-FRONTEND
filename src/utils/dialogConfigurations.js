@@ -45,6 +45,12 @@ export const dynamicComponents = {
         "@/views/apps/control-labs-traceability/components/ReagentsAndStandardsConsumption.vue"
       ),
   ),
+  AddEquipment: defineAsyncComponent(
+    () =>
+      import(
+        "@/views/apps/control-labs-traceability/components/addEquipment.vue"
+      ),
+  ),
 };
 
 // Configuración del diálogo
@@ -86,6 +92,12 @@ export const dialogMeta = {
       subtitle: "Equipo",
       actionId: 6,
     },
+    {
+      icon: "tabler-circle-plus",
+      title: "Agregar nuevo",
+      subtitle: "Equipo",
+      actionId: 7,
+    },
   ],
   stepsConfig: [
     {
@@ -119,6 +131,11 @@ export const dialogMeta = {
       actionId: 6,
       title: "Reportar Equipo",
       componentID: "ReportEquipment",
+    },
+    {
+      actionId: 7,
+      title: "Agregar Equipo",
+      componentID: "AddEquipment",
     },
   ],
   componentMap: dynamicComponents, // Uso directo del objeto de componentes dinámicos

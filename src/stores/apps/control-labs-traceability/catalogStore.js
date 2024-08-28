@@ -5,17 +5,40 @@ export const useCatalogStore = defineStore("catalog", {
   state: () => ({
     catalogTest: [],
     catalogEquipment: [],
+    totalItems: 0,
+    currentPage: 1,
+    totalPages: 1,
+    itemsPerPage: 10,
   }),
   actions: {
     async getCatalogAllEquipment() {
       try {
-        const { data } = await catalogService.getAllEquipment();
+        // Inicializar variables
+        const limit = 10; // Puedes ajustar el límite si es necesario
+        let allData = [];
 
+        // Hacer la primera solicitud para obtener el número total de elementos
+        const firstResponse = await catalogService.getAllEquipment(1, limit);
+        const { meta } = firstResponse;
+
+        // Verificar si los datos son válidos
+        if (!meta || !meta.totalDocuments) {
+          this.catalogEquipment = [];
+          return;
+        }
+
+        const totalItems = meta.totalDocuments;
+
+        // Hacer una solicitud para obtener todos los elementos de una vez
+        const { data } = await catalogService.getAllEquipment(1, totalItems);
+
+        // Verificar si los datos son válidos
         if (!Array.isArray(data)) {
           this.catalogEquipment = [];
           return;
         }
 
+        // Crear un mapa único de equipos y ordenar los resultados
         const uniqueEquipmentMap = new Map(
           data.map((item) => [
             item._id,
@@ -31,9 +54,15 @@ export const useCatalogStore = defineStore("catalog", {
           ]),
         );
 
+        // Convertir el mapa en un array y ordenarlo
         this.catalogEquipment = Array.from(uniqueEquipmentMap.values()).sort(
           (a, b) => a.combined.localeCompare(b.combined),
         );
+
+        // Actualizar la información de paginación en el frontend si es necesario
+        this.totalItems = totalItems; // Número total de elementos
+        this.currentPage = 1; // Resetea la página actual
+        this.totalPages = Math.ceil(totalItems / limit); // Número total de páginas
       } catch (error) {
         console.error("Error fetching equipment:", error);
       }

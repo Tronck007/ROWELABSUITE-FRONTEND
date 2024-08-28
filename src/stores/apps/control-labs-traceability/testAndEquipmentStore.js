@@ -497,6 +497,7 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
           sub: state.subHeaders,
         },
         filterSubtables: "tests_in_process",
+        WidgetCard: false,
         filterCards: {
           searchInput: true,
           filterStatus: false,
@@ -531,6 +532,7 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
           main: state.ReservationHeaders,
         },
         filterSubtables: "",
+        WidgetCard: false,
         filterCards: {
           searchInput: true,
           filterStatus: false,
@@ -566,6 +568,7 @@ export const useTestAndEquipment = defineStore("testAndEquipment", {
           sub: state.subHeadersEnd,
         },
         filterSubtables: "tests_in_process",
+        WidgetCard: false,
         filterCards: {
           searchInput: true,
           filterStatus: false,

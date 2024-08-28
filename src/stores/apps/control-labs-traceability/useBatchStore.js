@@ -9,6 +9,10 @@ export const useBatchStore = defineStore("batch", {
   state: () => ({
     isLoading: false,
     originalData: [],
+    itemsPerPage: 10,
+    currentPage: 1,
+    catalogCurrentPage: 1,
+    totalDocuments: 0,
     currentProcess: null,
     headers: [
       { title: "#LOTES", key: "item_batch_id" },
@@ -28,16 +32,22 @@ export const useBatchStore = defineStore("batch", {
     ],
   }),
   actions: {
-    async fetchAllBatchData() {
+    async fetchAllBatchData(page = 1, limit = 10) {
       this.isLoading = true;
       try {
-        const { data } = await catalogService.getAllBatchHistory();
-
-        // Mapear los datos recibidos para asignar un ID único a cada item
+        const { data, meta } = await catalogService.getAllBatchHistory(
+          page,
+          limit,
+        );
+        // Mapear los datos recibidos para asignar un ID único a cada item, manteniendo el cálculo original
         this.originalData = data.map((item, index) => ({
           ...item,
-          id: `${index}`,
+          id: `${index}`, // Mantiene el cálculo original
         }));
+
+        this.totalItems = meta.pagination.totalDocuments; // Guardar el total de elementos
+        this.currentPage = meta.pagination.currentPage; // Guardar la página actual
+        this.totalPages = meta.pagination.totalPages; // Guardar el total de páginas
       } catch (error) {
         console.error("Error fetching batch data:", error);
       } finally {
@@ -54,8 +64,76 @@ export const useBatchStore = defineStore("batch", {
 
       return `${diffHours} hora${diffHours !== 1 ? "s" : ""} ${diffMinutes} minutos`;
     },
+
+    // Nueva acción para descargar transformedData como Excel
+    downloadTransformedDataAsExcelById(batchId) {
+      const currentDate = new Date().toISOString().split("T")[0];
+      const fileName = `Historico_de_Lote_${batchId}_${currentDate}.xlsx`;
+
+      const batch = this.originalData.find(
+        (item) => item.item_batch_id === batchId,
+      );
+      if (!batch) {
+        console.error("Batch no encontrado");
+        return;
+      }
+
+      // Transformar los datos principales para Excel
+      const dataForExcel = batch.equipments.flatMap((equipment) =>
+        equipment.tests.map((test) => ({
+          "ID Lote": batch.item_batch_id,
+          "ID Artículo": batch.item_id,
+          "Descripción Artículo": batch.item_desc,
+          "ID Grupo de Prueba": batch.quality_test_group_id,
+          Estado: batch.state,
+          "Nombre del Equipo": equipment.equipment_name,
+          "Descripción del Equipo": equipment.equipment_desc,
+          "Prueba de Calidad": test.test_quality,
+          "Fecha de Inicio": formatExcelDate(
+            equipment.program_start_equipment_process,
+          ),
+          "Fecha de Fin": formatExcelDate(
+            equipment.program_end_equipment_process,
+          ),
+          "Fecha Real": formatExcelDate(equipment.real_end_equipment_process),
+          "Código del Usuario": equipment.createdBy.user_code,
+        })),
+      );
+
+      // Transformar los datos de material consumption para una hoja adicional
+      const materialConsumptionData = batch.material_consumption.flatMap(
+        (consumption) =>
+          consumption.items.map((item) => ({
+            Método: consumption.method,
+            Ensayo: consumption.assay,
+            "Código de Producto": item.productCode,
+            "Nombre del Producto": item.productName,
+            "Número de Lote": item.batchNumber,
+            "Fecha de Expiración": item.expiration_date,
+            Unidad: item.unit,
+            "Cantidad Requerida": item.quantityRequired,
+            "ID Muestra": item.samples
+              .map((sample) => sample.sample_id)
+              .join(", "),
+          })),
+      );
+
+      // Llamar a la función de utilidad para exportar el archivo Excel
+      exportDataToExcel(fileName, dataForExcel, {
+        "Material Consumption": materialConsumptionData,
+      });
+    },
   },
   getters: {
+    paginatedData(state) {
+      return state.originalData;
+    },
+    tableHeaders(state) {
+      return state.headers;
+    },
+    tableSubHeaders(state) {
+      return state.subHeaders;
+    },
     batchHistoryformation: (state) => (batchData) => {
       const batchMap = new Map();
 

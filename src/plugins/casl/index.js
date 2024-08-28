@@ -5,10 +5,8 @@ import { ability } from "./ability";
 export default function (app) {
   const authStore = useAuthStore();
   const userAbilityRules = authStore.abilityRules || [];
-  console.log("Initializing CASL with rules:", userAbilityRules);
 
   ability.update(userAbilityRules);
-  console.log("Initialized ability:", ability);
 
   app.use(abilitiesPlugin, ability, {
     useGlobalProperties: true,
