@@ -61,7 +61,7 @@ const userData = useCookie("userData").value
 const openDialog = () => {
   dialogStore.openDialogWithActionId([1])
   isDialogVisible.value = true
-  dialogStore.openBySection = 'equipment'
+  dialogStore.openBySection = 'samples'
 }
 
 const closeDialog = () => {

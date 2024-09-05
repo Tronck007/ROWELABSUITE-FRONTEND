@@ -21,18 +21,6 @@ export const dynamicComponents = {
         "@/views/apps/control-labs-traceability/components/reservationSamples.vue"
       ),
   ),
-  InsLabSamples: defineAsyncComponent(
-    () =>
-      import(
-        "@/views/apps/control-labs-traceability/components/insLabSamples.vue"
-      ),
-  ),
-  ToolsLabs: defineAsyncComponent(
-    () =>
-      import(
-        "@/views/apps/control-labs-traceability/components/insLabSamples.vue"
-      ),
-  ),
   ReportEquipment: defineAsyncComponent(
     () =>
       import(

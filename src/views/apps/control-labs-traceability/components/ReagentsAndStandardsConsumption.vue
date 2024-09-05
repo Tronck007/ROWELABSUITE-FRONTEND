@@ -292,7 +292,7 @@ const handleSubmit = async () => {
     try {
       // Crear el objeto de MaterialConsumption
       const MaterialConsumption = {
-        processCode: dialogStore.currentProcessItem.item.process_code,
+        processCode: dialogStore.currentProcess.process_code,
         method: finalMethod.value,
         assay: finalAssay.value,
         items: tableItems.value,
